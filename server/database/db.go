@@ -56,6 +56,7 @@ func Setup(db *gorm.DB) error {
 		&entity.User{},
 		&entity.UserServices{},
 		&entity.Content{},
+		&entity.ContentTranslation{},
 		&entity.Watched{},
 		&entity.WatchedSeason{},
 		&entity.WatchedEpisode{},

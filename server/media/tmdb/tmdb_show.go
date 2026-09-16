@@ -13,6 +13,7 @@ type ShowDetailsOptions struct {
 	ID string
 	// Country (currently used for watch providers)
 	Country string
+	Language string
 	// Request params map.
 	Params map[string]string
 
@@ -28,12 +29,18 @@ func (t *TMDB) ShowDetails(o ShowDetailsOptions) (ShowDetails, error) {
 		o.ID,
 		o.Country,
 		o.Params)
+	cacheKey = cache.CreateCacheKey(cacheKey, o.Language)
+	params := o.Params
+	if params == nil {
+		params = map[string]string{}
+	}
+	params["language"] = o.Language
 	resp := new(ShowDetails)
 	if cache.GetCache(ContentStore, cacheKey, &resp) {
 		slog.Debug("ShowDetails: Returning cache.")
 		return *resp, nil
 	}
-	err := t.req("/tv/"+o.ID, o.Params, &resp)
+	err := t.req("/tv/"+o.ID, params, &resp)
 	if err != nil {
 		slog.Error("ShowDetails: Request failed!", "error", err)
 		return ShowDetails{}, errors.New("request failed")
@@ -51,9 +58,9 @@ func (t *TMDB) ShowDetails(o ShowDetailsOptions) (ShowDetails, error) {
 	return *resp, nil
 }
 
-func (t *TMDB) ShowCredits(id string) (ContentCredits, error) {
+func (t *TMDB) ShowCredits(id string, language string) (ContentCredits, error) {
 	resp := new(ContentCredits)
-	err := t.req("/tv/"+id+"/credits", map[string]string{}, &resp)
+	err := t.req("/tv/"+id+"/credits", map[string]string{"language": language}, &resp)
 	if err != nil {
 		slog.Error("ShowCredits: Request failed!", "error", err)
 		return ContentCredits{}, errors.New("request failed")
@@ -64,8 +71,9 @@ func (t *TMDB) ShowCredits(id string) (ContentCredits, error) {
 func (t *TMDB) SeasonDetails(
 	showId string,
 	seasonNumber string,
+	language string,
 ) (SeasonDetails, error) {
-	cacheKey := cache.CreateCacheKey("SeasonDetails", showId, seasonNumber)
+	cacheKey := cache.CreateCacheKey("SeasonDetails", showId, seasonNumber, language)
 	resp := new(SeasonDetails)
 	if cache.GetCache(ContentStore, cacheKey, &resp) {
 		slog.Debug("SeasonDetails: Returning cache.")
@@ -73,7 +81,7 @@ func (t *TMDB) SeasonDetails(
 	}
 	err := t.req(
 		"/tv/"+showId+"/season/"+seasonNumber,
-		map[string]string{},
+		map[string]string{"language": language},
 		&resp)
 	if err != nil {
 		slog.Error("SeasonDetails: Request failed!", "error", err)

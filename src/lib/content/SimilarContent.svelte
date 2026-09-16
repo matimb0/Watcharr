@@ -2,6 +2,7 @@
 	import type { Media } from "@/types";
 	import HorizontalList from "../HorizontalList.svelte";
 	import Poster from "../poster/Poster.svelte";
+	import { t } from "@/lib/i18n";
 
 	interface Props {
 		similar: Media[];
@@ -11,7 +12,7 @@
 </script>
 
 {#if similar?.length > 0}
-	<HorizontalList title="Similar">
+	<HorizontalList title={t("details.similar")}>
 		{#each similar as content, i (content.ids)}
 			<Poster media={content} small={true} bind:watched={similar[i].watched} />
 		{/each}

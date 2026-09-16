@@ -69,6 +69,11 @@ func AuthRequired(db *gorm.DB, cfg *config.ServerConfig) gin.HandlerFunc {
 				if dbUser.Country != nil {
 					c.Set("userCountry", *dbUser.Country)
 				}
+				if dbUser.Language != nil {
+					c.Set("userLanguage", *dbUser.Language)
+				} else {
+					c.Set("userLanguage", "en")
+				}
 			}
 			c.Next()
 		} else {

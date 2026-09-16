@@ -229,6 +229,7 @@ export interface UserSettings {
 	hideSpoilers: boolean;
 	includePreviouslyWatched: boolean;
 	country: string;
+	language: Language;
 	automateShowStatuses: boolean;
 	ratingSystem?: RatingSystem;
 	/**
@@ -238,6 +239,8 @@ export interface UserSettings {
 	 */
 	ratingStep?: RatingStep;
 }
+
+export type Language = "de" | "en";
 
 export enum RatingSystem {
 	OutOf10, // default

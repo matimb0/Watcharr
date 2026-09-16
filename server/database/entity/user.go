@@ -56,6 +56,8 @@ type UserSettings struct {
 	// User's country to get correct content streaming providers.
 	// TODO Enforce iso_3166_1 validity (same as tmdb)
 	Country *string `gorm:"default:'US'" json:"country"`
+	// Language used for the Watcharr UI and external content metadata.
+	Language *string `gorm:"default:'en'" json:"language"`
 	// Does the user want show, season and episode automations enabled.
 	AutomateShowStatuses *bool `gorm:"default:true" json:"automateShowStatuses"`
 	// Rating system user wants to use (frontend only).

@@ -7,7 +7,6 @@
 	import Stat from "@/lib/stats/Stat.svelte";
 	import Stats from "@/lib/stats/Stats.svelte";
 	import { req, updateUserSetting } from "@/lib/util/api";
-	import { getOrdinalSuffix, monthsShort } from "@/lib/util/helpers";
 	import { store } from "@/store.svelte";
 	import { UserType, type Image, type Profile } from "@/types";
 	import { notify } from "@/lib/util/notify";
@@ -20,6 +19,9 @@
 	import ExportListModal from "./modals/ExportListModal.svelte";
 	import { ReqerError } from "@/lib/util/fetch";
 	import { resolve } from "$app/paths";
+	import DropDown from "@/lib/DropDown.svelte";
+	import { t } from "@/lib/i18n";
+	import type { Language } from "@/types";
 
 	let user = $derived(store.userInfo);
 	let settings = $derived(store.userSettings);
@@ -30,6 +32,8 @@
 	let exportModalOpen = $state(false);
 	let hideSpoilersDisabled = $state(false);
 	let countryDisabled = $state(false);
+	let languageDisabled = $state(false);
+	let selectedLanguage = $state<Language>("en");
 	let includePreviouslyWatchedDisabled = $state(false);
 	let automateShowStatusesDisabled = $state(false);
 	let pwChangeModalOpen = $state(false);
@@ -37,14 +41,17 @@
 	let jellyfinSyncModalOpen = $state(false);
 	let plexSyncModalOpen = $state(false);
 
+	$effect(() => {
+		selectedLanguage = settings?.language ?? "en";
+	});
+
 	async function getProfile() {
 		return await req.get<Profile>(`/profile`);
 	}
 
 	function formatDate(d: Date) {
-		return `${d.getDate()}${getOrdinalSuffix(d.getDate())} ${
-			monthsShort[d.getMonth()]
-		} ${d.getFullYear()}`;
+		const locale = store.userSettings?.language === "de" ? "de-DE" : "en-US";
+		return new Intl.DateTimeFormat(locale, { dateStyle: "medium" }).format(d);
 	}
 
 	function updateBio(
@@ -55,19 +62,19 @@
 			console.warn("updateBio called without any value", newBio);
 			return;
 		}
-		const nid = notify({ text: "Updating Bio", type: "loading" });
+		const nid = notify({ text: t("profile.updatingBio"), type: "loading" });
 		req
 			.post("/user/bio", { newBio: newBio })
 			.then(() => {
 				if (user) {
 					user.bio = newBio;
-					notify({ id: nid, text: "Updated Bio", type: "success" });
+					notify({ id: nid, text: t("profile.updatedBio"), type: "success" });
 				}
 			})
 			.catch((err) => {
 				notify({
 					id: nid,
-					text: ReqerError.getMsg(err, "Failed to update bio"),
+					text: ReqerError.getMsg(err, t("profile.failedBio")),
 					type: "error",
 				});
 			});
@@ -79,7 +86,7 @@
 			console.error("avatarDropped: no file found");
 			return;
 		}
-		const nid = notify({ text: "Uploading avatar", type: "loading" });
+		const nid = notify({ text: t("profile.uploadingAvatar"), type: "loading" });
 		const fd = new FormData();
 		fd.append("avatar", files[0]);
 		req
@@ -87,14 +94,14 @@
 			.then((r) => {
 				if (user) {
 					user.avatar = r;
-					notify({ id: nid, text: "Avatar Uploaded", type: "success" });
+					notify({ id: nid, text: t("profile.avatarUploaded"), type: "success" });
 				}
 			})
 			.catch((err) => {
 				console.error("uploading avatar failed", err);
 				notify({
 					id: nid,
-					text: ReqerError.getMsg(err, "Failed to upload avatar"),
+					text: ReqerError.getMsg(err, t("profile.failedAvatar")),
 					type: "error",
 				});
 			});
@@ -106,7 +113,7 @@
 	 */
 	function toFormattedTimeLong(m: number) {
 		// Considers a 30 days long month
-		const countInMinutes = [
+		const countInMinutes: ["month" | "week" | "day" | "hour", number][] = [
 			["month", 43200],
 			["week", 10080],
 			["day", 1440],
@@ -118,18 +125,21 @@
 			tmp = Math.floor(m / (c[1] as number));
 
 			// Ignore fields with fewer than 1 unit
-			if (tmp) ansString += `${tmp} ${c[0]}${tmp >= 2 ? "s, " : ", "}`;
+			if (tmp) {
+				const unit = t(`profile.${tmp >= 2 ? `${c[0]}s` : c[0]}`);
+				ansString += `${tmp} ${unit}, `;
+			}
 			m -= tmp * (c[1] as number);
 		}
 		if (!ansString) {
-			return "0 hours";
+			return `0 ${t("profile.hours")}`;
 		}
 		return ansString.slice(0, -2);
 	}
 </script>
 
 <svelte:head>
-	<title>My Profile</title>
+	<title>{t("profile.title")}</title>
 </svelte:head>
 
 <div class="content">
@@ -139,13 +149,13 @@
 			<div>
 				<h2 title={user?.username}>
 					<span style="font-weight: normal; font-variant: all-small-caps;"
-						>Hey</span
+						>{t("profile.greeting")}</span
 					>
 					{user?.username}
 				</h2>
 				<textarea
 					rows="1"
-					placeholder="my bio"
+					placeholder={t("profile.bioPlaceholder")}
 					onblur={updateBio}
 					value={user?.bio}></textarea>
 			</div>
@@ -155,56 +165,56 @@
 			{#await getProfilePromise}
 				<Spinner />
 			{:then profile}
-				<Stat name="Joined" value={formatDate(new Date(profile.joined))} />
-				<Stat name="Movies Watched" value={profile.moviesWatched} large />
-				<Stat name="Shows Watched" value={profile.showsWatched} large />
+				<Stat name={t("profile.joined")} value={formatDate(new Date(profile.joined))} />
+				<Stat name={t("profile.moviesWatched")} value={profile.moviesWatched} large />
+				<Stat name={t("profile.showsWatched")} value={profile.showsWatched} large />
 				<Stat
-					name="Watching Movies"
+					name={t("profile.watchingMovies")}
 					value={toFormattedTimeLong(profile.moviesWatchedRuntime)}
 				/>
 				<Stat
-					name="Watching Shows"
+					name={t("profile.watchingShows")}
 					value={toFormattedTimeLong(profile.showsWatchedRuntime)}
-					disc="This is very inaccurate 🚀"
+					disc={t("profile.inaccurateRuntime")}
 				/>
 			{:catch err}
-				<Error error={err} pretty="Failed to get stats!" />
+				<Error error={err} pretty={t("profile.failedStats")} />
 			{/await}
 		</Stats>
 
 		<div class="settings">
-			<h3 class="norm">Settings</h3>
+			<h3 class="norm">{t("profile.settings")}</h3>
 
 			<div class="theme">
-				<h4 class="norm">Theme</h4>
+				<h4 class="norm">{t("profile.theme")}</h4>
 				<div class="row">
 					<button
 						class={`plain${selectedTheme === "system" ? " selected" : ""}`}
 						id="system"
 						onclick={() => toggleTheme("system")}
 					>
-						<span>system</span>
+						<span>{t("profile.system")}</span>
 					</button>
 					<button
 						class={`plain${selectedTheme === "light" ? " selected" : ""}`}
 						id="light"
 						onclick={() => toggleTheme("light")}
 					>
-						light
+						{t("profile.light")}
 					</button>
 					<button
 						class={`plain${selectedTheme === "dark" ? " selected" : ""}`}
 						id="dark"
 						onclick={() => toggleTheme("dark")}
 					>
-						dark
+						{t("profile.dark")}
 					</button>
 				</div>
 			</div>
 
 			<Setting
-				title="Country"
-				desc="What country would you like to see available streaming providers for?"
+				title={t("profile.country")}
+				desc={t("profile.countryDescription")}
 			>
 				<RegionDropDown
 					selectedCountry={settings?.country}
@@ -218,7 +228,33 @@
 				/>
 			</Setting>
 
-			<Setting title="Private" desc="Hide your profile from others?" row>
+			<Setting
+				title={t("profile.language")}
+				desc={t("profile.languageDescription")}
+			>
+				<DropDown
+					options={[
+						{ id: "de", value: t("profile.german") },
+						{ id: "en", value: t("profile.english") },
+					]}
+					isDropDownItem
+					bind:active={selectedLanguage}
+					placeholder={t("profile.language")}
+					disabled={languageDisabled}
+					onChange={() => {
+						languageDisabled = true;
+						updateUserSetting("language", selectedLanguage, () => {
+							languageDisabled = false;
+						});
+					}}
+				/>
+			</Setting>
+
+			<Setting
+				title={t("profile.private")}
+				desc={t("profile.privateDescription")}
+				row
+			>
 				<Checkbox
 					name="private"
 					disabled={privateDisabled}
@@ -234,8 +270,8 @@
 
 			{#if !settings?.private}
 				<Setting
-					title="Private Thoughts"
-					desc="Hide your watched list thoughts from followers?"
+					title={t("profile.privateThoughts")}
+					desc={t("profile.privateThoughtsDescription")}
 					row
 				>
 					<Checkbox
@@ -253,8 +289,8 @@
 			{/if}
 
 			<Setting
-				title="Hide Spoilers"
-				desc="Do you want to hide episode info?"
+				title={t("profile.hideSpoilers")}
+				desc={t("profile.hideSpoilersDescription")}
 				row
 			>
 				<Checkbox
@@ -271,9 +307,9 @@
 			</Setting>
 
 			<Setting
-				title="Automate Show Statuses"
-				desc="Do you want to automate show statuses (show, season, episode)?"
-				tag="experimental"
+				title={t("profile.automateShowStatuses")}
+				desc={t("profile.automateShowStatusesDescription")}
+				tag={t("profile.experimental")}
 				row
 			>
 				<Checkbox
@@ -290,8 +326,8 @@
 			</Setting>
 
 			<Setting
-				title="Include Previously Watched"
-				desc="Should previously finished items be included in the 'Finished' status filter?"
+				title={t("profile.includePreviouslyWatched")}
+				desc={t("profile.includePreviouslyWatchedDescription")}
 				row
 			>
 				<Checkbox
@@ -310,23 +346,23 @@
 			<RatingSetting />
 
 			<div class="row btns">
-				<button onclick={() => goto(resolve("/import"))}>Import</button>
-				<button onclick={() => (exportModalOpen = true)}>Export</button>
+				<button onclick={() => goto(resolve("/import"))}>{t("profile.import")}</button>
+				<button onclick={() => (exportModalOpen = true)}>{t("profile.export")}</button>
 				{#if user?.type !== UserType.Plex && user?.type !== UserType.Jellyfin}
 					<button
 						onclick={() => {
 							pwChangeModalOpen = true;
-						}}>Change Password</button
+						}}>{t("profile.changePassword")}</button
 					>
 				{/if}
 				{#if user?.type === UserType?.Jellyfin}
 					<button onclick={() => (jellyfinSyncModalOpen = true)}>
-						Sync With {localStorage.getItem("useEmby") ? "Emby" : "Jellyfin"}
+						{t("profile.syncWith")} {localStorage.getItem("useEmby") ? "Emby" : "Jellyfin"}
 					</button>
 				{/if}
 				{#if user?.type === UserType?.Plex}
 					<button onclick={() => (plexSyncModalOpen = true)}>
-						Sync With Plex
+						{t("profile.syncWith")} Plex
 					</button>
 				{/if}
 			</div>

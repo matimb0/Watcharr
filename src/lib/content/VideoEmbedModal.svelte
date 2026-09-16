@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { onMount } from "svelte";
+	import { t } from "@/lib/i18n";
 
 	interface Props {
 		embed: string;
@@ -38,7 +39,7 @@
 	{#if embed}
 		<div class="wrapper">
 			<iframe
-				title="Video Embed"
+				title={t("content.videoEmbed")}
 				src={embed}
 				frameborder="0"
 				width="100%"

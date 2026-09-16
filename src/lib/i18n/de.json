@@ -116,40 +116,22 @@
 		"mediocre": "Mittelmäßig",
 		"liked": "Gefällt mir"
 	},
-	"common": {
-		"unknown": "Unbekannt",
-		"followedThoughts": "Gedanken von Followern",
-		"noThoughts": "Noch keine Gedanken.",
-		"failedFollowedThoughts": "Gedanken von Followern konnten nicht geladen werden!",
-		"thoughts": "Gedanken",
-		"delete": "Löschen",
-		"contentDeleteError": "Der Inhalt hat keinen Eintrag in der Watchlist und kann nicht gelöscht werden."
-		,"videoEmbed": "Video-Einbettung"
-		,"play": "Wiedergabe"
-		,"plays": "Wiedergaben"
-		,"setThoughts": "Gedanken zu {content} festlegen"
-		,"yourThoughts": "Deine Gedanken"
-		,"thoughtsDescription": "Deine Gedanken zu {content} ansehen oder bearbeiten"
-		,"thoughtsPlaceholder": "Meine Gedanken zu {content}"
-		,"failedThoughtsBox": "Das Textfeld konnte nicht gefunden werden. Bitte kopiere deine Änderungen, damit sie nicht verloren gehen, und versuche es erneut!"
-		,"removeFromList": "Von deiner Liste entfernen?"
-		,"removeDescription": "Dadurch wird {content} aus deiner Hauptliste gelöscht. Die Daten gehen verloren."
-		,"removeConfirm": "Von meiner Hauptliste entfernen"
-		,"activity": "Aktivität"
-		,"noActivity": "Du hast keine Aktivitäten!"
-		,"automatedBecause": "Automatisch ausgeführt, weil {reason}"
-		,"completedAutomation": "Durch eine Automatisierung abgeschlossen."
-		,"countsAsPlay": "Zählt als Wiedergabe."
-		,"status": {
-			"planned": "Geplant",
-			"watching": "Ansehen",
-			"playing": "Spielen",
-			"finished": "Fertig",
-			"played": "Gespielt",
-			"hold": "Pausiert",
-			"dropped": "Abgebrochen"
-		}
-		,"activityMessages": {
+	"status": {
+		"planned": "Geplant",
+		"watching": "Ansehen",
+		"playing": "Spielen",
+		"finished": "Fertig",
+		"played": "Gespielt",
+		"hold": "Pausiert",
+		"dropped": "Abgebrochen"
+	},
+	"activity": {
+		"title": "Aktivität",
+		"empty": "Du hast keine Aktivitäten!",
+		"automatedBecause": "Automatisch ausgeführt, weil {reason}",
+		"completedAutomation": "Durch eine Automatisierung abgeschlossen.",
+		"countsAsPlay": "Zählt als Wiedergabe.",
+		"messages": {
 			"added": "Zur Watchlist hinzugefügt",
 			"removed": "Von der Watchlist entfernt",
 			"ratingChanged": "Bewertung geändert auf {rating}",
@@ -182,7 +164,37 @@
 			"episodeStatusChangedSimple": "Status der Episode geändert",
 			"episodeRemovedSimple": "Episode entfernt"
 		}
-		,"deletionCallbackError": "Der Löschvorgang konnte nicht abgeschlossen werden. Bitte versuche es erneut."
+	},
+	"content": {
+		"unknown": "Unbekannt",
+		"videoEmbed": "Video-Einbettung",
+		"play": "Wiedergabe",
+		"plays": "Wiedergaben",
+		"followedThoughts": {
+			"title": "Gedanken von Followern",
+			"empty": "Noch keine Gedanken.",
+			"failed": "Gedanken von Followern konnten nicht geladen werden!"
+		},
+		"thoughts": {
+			"title": "Gedanken",
+			"set": "Gedanken zu {content} festlegen",
+			"your": "Deine Gedanken",
+			"description": "Deine Gedanken zu {content} ansehen oder bearbeiten",
+			"placeholder": "Meine Gedanken zu {content}",
+			"failedBox": "Das Textfeld konnte nicht gefunden werden. Bitte kopiere deine Änderungen, damit sie nicht verloren gehen, und versuche es erneut!",
+			"noThoughts": "Noch keine Gedanken."
+		},
+		"removeFromList": {
+			"title": "Von deiner Liste entfernen?",
+			"description": "Dadurch wird {content} aus deiner Hauptliste gelöscht. Die Daten gehen verloren.",
+			"confirm": "Von meiner Hauptliste entfernen"
+		},
+		"deleteError": "Der Löschvorgang konnte nicht abgeschlossen werden. Bitte versuche es erneut."
+	},
+	"common": {
+		"unknown": "Unbekannt",
+		"delete": "Löschen",
+		"contentDeleteError": "Der Inhalt hat keinen Eintrag in der Watchlist und kann nicht gelöscht werden."
 	},
 	"nav": {
 		"search": "Suchen",
@@ -233,3 +245,4 @@
 		"delete": "Löschen"
 	}
 }
+

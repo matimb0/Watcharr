@@ -9,9 +9,9 @@ import (
 	"github.com/sbondCo/Watcharr/cache"
 )
 
-func (t *TMDB) PersonDetails(id string) (PersonDetails, error) {
+func (t *TMDB) PersonDetails(id string, language string) (PersonDetails, error) {
 	resp := new(PersonDetails)
-	err := t.req("/person/"+id, map[string]string{}, &resp)
+	err := t.req("/person/"+id, map[string]string{"language": language}, &resp)
 	if err != nil {
 		slog.Error("PersonDetails: Request failed!", "error", err)
 		return PersonDetails{}, errors.New("request failed")
@@ -19,8 +19,8 @@ func (t *TMDB) PersonDetails(id string) (PersonDetails, error) {
 	return *resp, nil
 }
 
-func (t *TMDB) PersonCredits(id string) (PersonCombinedCredits, error) {
-	cacheKey := cache.CreateCacheKey("PersonCredits", id)
+func (t *TMDB) PersonCredits(id string, language string) (PersonCombinedCredits, error) {
+	cacheKey := cache.CreateCacheKey("PersonCredits", id, language)
 	resp := new(PersonCombinedCredits)
 	if cache.GetCache(ContentStore, cacheKey, &resp) {
 		slog.Debug("PersonCredits: Returning cache.")
@@ -28,7 +28,7 @@ func (t *TMDB) PersonCredits(id string) (PersonCombinedCredits, error) {
 	}
 	err := t.req(
 		"/person/"+id+"/combined_credits",
-		map[string]string{},
+		map[string]string{"language": language},
 		&resp)
 	if err != nil {
 		slog.Error("PersonCredits: Request failed!", "error", err)
@@ -38,8 +38,8 @@ func (t *TMDB) PersonCredits(id string) (PersonCombinedCredits, error) {
 	return *resp, nil
 }
 
-func (t *TMDB) PopularPeople(pageNum int) (PopularPeople, error) {
-	cacheKey := cache.CreateCacheKey("PopularPeople", pageNum)
+func (t *TMDB) PopularPeople(pageNum int, language string) (PopularPeople, error) {
+	cacheKey := cache.CreateCacheKey("PopularPeople", pageNum, language)
 	resp := new(PopularPeople)
 	if cache.GetCache(ContentStore, cacheKey, &resp) {
 		slog.Debug("PopularPeople: Returning cache.")
@@ -47,7 +47,7 @@ func (t *TMDB) PopularPeople(pageNum int) (PopularPeople, error) {
 	}
 	err := t.req(
 		"/person/popular",
-		map[string]string{"page": strconv.Itoa(pageNum)},
+		map[string]string{"page": strconv.Itoa(pageNum), "language": language},
 		&resp)
 	if err != nil {
 		slog.Error("PopularPeople: Request failed!", "error", err)

@@ -359,7 +359,7 @@ func (s *Service) hookEpisodeStatusChanged(userId uint, watchedId uint, seasonNu
 	//     to Watching just above. I think this might never happen to anyone so um ye.
 	tmdbIdStr := strconv.Itoa(watchedShow.Content.TmdbID)
 	seasonNumStr := strconv.Itoa(seasonNum)
-	seasonDetails, err := s.tmdb.SeasonDetails(tmdbIdStr, seasonNumStr)
+	seasonDetails, err := s.tmdb.SeasonDetails(tmdbIdStr, seasonNumStr, "en")
 	if err != nil {
 		slog.Error("hookEpisodeStatusChanged: Failed to get season details!", "error", err)
 		hookResponse.Errors = append(hookResponse.Errors, "failed to get season details for show")

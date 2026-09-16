@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { dateValid } from "../util/date";
+	import { t } from "@/lib/i18n";
 
 	interface Props {
 		homepage?: string;
@@ -19,7 +20,7 @@
 			? Math.round(voteAverage > 10 ? voteAverage : voteAverage * 10) / 10
 			: 0,
 	);
-	const titleSafe = $derived(title ? title : "Unknown Title");
+	const titleSafe = $derived(title ? title : t("content.unknown"));
 	const releaseYear = $derived(
 		dateValid(releaseDate) ? releaseDate.getFullYear() : undefined,
 	);
@@ -47,7 +48,7 @@
 	</span>
 	<span
 		class="rating"
-		title={`Rating: ${vote} out of 10 (based on ${voteCount ?? 0} votes)`}
+		title={t("rating.ratingTooltip", { rating: vote, votes: voteCount ?? 0 })}
 	>
 		<span>*</span>
 		{vote}

@@ -15,12 +15,13 @@
 	import PageBackdrop from "@/lib/generic/PageBackdrop.svelte";
 	import PosterImage from "@/lib/content/PosterImage.svelte";
 	import ExpandableText from "@/lib/content/ExpandableText.svelte";
+	import { t } from "@/lib/i18n";
 
 	let { data } = $props();
 
 	let person: PersonDetailsResponse | undefined = $state();
 	let pageError: unknown | undefined = $state();
-	let sortOption = $state("Vote count");
+	let sortOption = $state("voteCount");
 	let credits: PersonCreditsResponse | undefined = $state();
 	let onMyListFilter = $state(false);
 
@@ -96,15 +97,15 @@
 	function sortCredits(sortOption: string) {
 		if (!credits || !credits.credits) return;
 		switch (sortOption) {
-			case "Vote count":
+			case "voteCount":
 				credits.credits.sort(
 					(a, b) => (b.ratingCount ?? 0) - (a.ratingCount ?? 0),
 				);
 				break;
-			case "Newest":
+			case "newest":
 				credits.credits.sort((a, b) => newestOldestSort(a, b, 0));
 				break;
-			case "Oldest":
+			case "oldest":
 				credits.credits.sort((a, b) => newestOldestSort(a, b, 1));
 				break;
 		}
@@ -113,12 +114,12 @@
 </script>
 
 <svelte:head>
-	<title>{person?.name ? `${person.name} - ` : ""}Person</title>
+	<title>{person?.name ? `${person.name} - ` : ""}{t("details.person")}</title>
 </svelte:head>
 
 <div>
 	{#if pageError}
-		<Error pretty="Failed to load person!" error={pageError} />
+		<Error pretty={t("details.failedPerson")} error={pageError} />
 	{:else if !person}
 		<Spinner />
 	{:else if Object.keys(person).length > 0}
@@ -146,24 +147,24 @@
 								<span></span>
 							</span>
 
-							<ExpandableText title="Biography" text={person.biography} />
+							<ExpandableText title={t("details.biography")} text={person.biography} />
 
 							<div class="detail-info">
 								{#if person.knownForDepartment}
 									<div>
-										<span>Department</span>
+										<span>{t("details.department")}</span>
 										<span>{person.knownForDepartment}</span>
 									</div>
 								{/if}
 								{#if person.placeOfBirth}
 									<div>
-										<span>Born In</span>
+										<span>{t("details.bornIn")}</span>
 										<span>{person.placeOfBirth}</span>
 									</div>
 								{/if}
 								{#if person.birthday}
 									<div>
-										<span>Born On</span>
+										<span>{t("details.bornOn")}</span>
 										<span
 											>{new Date(
 												Date.parse(person.birthday),
@@ -173,7 +174,7 @@
 								{/if}
 								{#if person.deathday}
 									<div>
-										<span>Died On</span>
+										<span>{t("details.diedOn")}</span>
 										<span>
 											{new Date(
 												Date.parse(person.deathday),
@@ -183,8 +184,8 @@
 								{/if}
 								{#if person.age}
 									<div>
-										<span>Age</span>
-										<span>{person.age} Years</span>
+										<span>{t("details.age")}</span>
+										<span>{person.age} {t("details.years")}</span>
 									</div>
 								{/if}
 							</div>
@@ -196,14 +197,18 @@
 				{#if credits?.credits && credits?.credits?.length > 0}
 					<div class="filters">
 						<div class="listFilter">
-							<span>On my list</span>
-							<Checkbox name="On my list" bind:value={onMyListFilter} />
+							<span>{t("details.onMyList")}</span>
+							<Checkbox name={t("details.onMyList")} bind:value={onMyListFilter} />
 						</div>
 						<DropDown
 							bind:active={sortOption}
-							placeholder="Vote count"
-							options={["Vote count", "Newest", "Oldest"]}
-							isDropDownItem={false}
+							placeholder={t("details.voteCount")}
+							options={[
+								{ id: "voteCount", value: t("details.voteCount") },
+								{ id: "newest", value: t("details.newest") },
+								{ id: "oldest", value: t("details.oldest") },
+							]}
+							isDropDownItem
 							showActiveElementsInOptions={true}
 						/>
 					</div>
@@ -222,8 +227,8 @@
 				{:else}
 					<div class="no-credits-message">
 						<Icon i="star" wh={80} />
-						<h2 class="norm">We found no credits!</h2>
-						<h4 class="norm">It seems that this person has no credits.</h4>
+						<h2 class="norm">{t("details.noCreditsTitle")}</h2>
+						<h4 class="norm">{t("details.noCreditsDescription")}</h4>
 					</div>
 				{/if}
 			{:else}
@@ -233,7 +238,7 @@
 			person not found
 		{/if}
 	{:else}
-		<Error error="Person not found" pretty="Person not found" />
+			<Error error={t("details.notFound")} pretty={t("details.notFound")} />
 	{/if}
 </div>
 

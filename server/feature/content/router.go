@@ -4,9 +4,7 @@ import (
 	"log/slog"
 	"net/http"
 	"strconv"
-	"time"
 
-	"github.com/gin-contrib/cache"
 	"github.com/gin-gonic/gin"
 	"github.com/sbondCo/Watcharr/database/entity"
 	"github.com/sbondCo/Watcharr/domain"
@@ -45,25 +43,20 @@ func NewRouter(
 }
 
 func (r *Router) AddRoutes() {
-	content := r.br.Router.Group("/content").Use(authmiddleware.AuthRequired(nil, r.br.Cfg))
-	exp := time.Hour * 24
-
-	// NOTE: Some routes use `cache.CachePage`, but others that contain user watched data
-	// don't and rather have their caching on the TMDB methods directly.
-
+	content := r.br.Router.Group("/content").Use(authmiddleware.AuthRequired(r.br.DB, r.br.Cfg))
 	// Get movie details (for movie page)
 	content.GET("/movie/:id", router.WhereaboutsRequired(r.br.Cfg), r.GetMovieDetails)
 	// Get movie cast
-	content.GET("/movie/:id/credits", cache.CachePage(r.br.MemStore, exp, r.GetMovieCredits))
+	content.GET("/movie/:id/credits", r.GetMovieCredits)
 	// Get tv details (for tv page)
 	content.GET("/tv/:id", router.WhereaboutsRequired(r.br.Cfg), r.GetTvDetails)
 	// Get tv cast
-	content.GET("/tv/:id/credits", cache.CachePage(r.br.MemStore, exp, r.GetTvCredits))
+	content.GET("/tv/:id/credits", r.GetTvCredits)
 	// Get season details
 	// Supports `watchedId` query parameter for saving the requested season as `LastViewedSeason`.
 	content.GET("/tv/:id/season/:num", r.GetSeasonDetails)
 	// Get person details
-	content.GET("/person/:id", cache.CachePage(r.br.MemStore, exp, r.GetPerson))
+	content.GET("/person/:id", r.GetPerson)
 	// Get person credits
 	content.GET("/person/:id/credits", r.GetPersonCredits)
 	// Available regions for watch providers
@@ -79,9 +72,11 @@ func (r *Router) GetMovieDetails(c *gin.Context) {
 	content, err := r.tmdb.MovieDetails(tmdb.MovieDetailsOptions{
 		ID:      c.Param("id"),
 		Country: c.MustGet("userCountry").(string),
+		Language: c.MustGet("userLanguage").(string),
 		Params: map[string]string{
 			"append_to_response": "videos,watch/providers,similar",
 		},
+		DontRunDBCache: true,
 	})
 	if err != nil {
 		c.JSON(http.StatusBadRequest, router.ErrorResponse{Error: err.Error()})
@@ -119,7 +114,7 @@ func (r *Router) GetMovieCredits(c *gin.Context) {
 		c.Status(400)
 		return
 	}
-	content, err := r.tmdb.MovieCredits(c.Param("id"))
+	content, err := r.tmdb.MovieCredits(c.Param("id"), c.MustGet("userLanguage").(string))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, router.ErrorResponse{Error: err.Error()})
 		return
@@ -137,9 +132,11 @@ func (r *Router) GetTvDetails(c *gin.Context) {
 	content, err := r.tmdb.ShowDetails(tmdb.ShowDetailsOptions{
 		ID:      c.Param("id"),
 		Country: c.MustGet("userCountry").(string),
+		Language: c.MustGet("userLanguage").(string),
 		Params: map[string]string{
 			"append_to_response": "videos,watch/providers,similar,external_ids,keywords",
 		},
+		DontRunDBCache: true,
 	})
 	if err != nil {
 		c.JSON(http.StatusBadRequest, router.ErrorResponse{Error: err.Error()})
@@ -177,7 +174,7 @@ func (r *Router) GetTvCredits(c *gin.Context) {
 		c.Status(400)
 		return
 	}
-	content, err := r.tmdb.ShowCredits(c.Param("id"))
+	content, err := r.tmdb.ShowCredits(c.Param("id"), c.MustGet("userLanguage").(string))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, router.ErrorResponse{Error: err.Error()})
 		return
@@ -192,7 +189,7 @@ func (r *Router) GetSeasonDetails(c *gin.Context) {
 		c.Status(400)
 		return
 	}
-	content, err := r.tmdb.SeasonDetails(c.Param("id"), c.Param("num"))
+	content, err := r.tmdb.SeasonDetails(c.Param("id"), c.Param("num"), c.MustGet("userLanguage").(string))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, router.ErrorResponse{Error: err.Error()})
 		return
@@ -229,7 +226,7 @@ func (r *Router) GetPerson(c *gin.Context) {
 		c.Status(400)
 		return
 	}
-	content, err := r.tmdb.PersonDetails(c.Param("id"))
+	content, err := r.tmdb.PersonDetails(c.Param("id"), c.MustGet("userLanguage").(string))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, router.ErrorResponse{Error: err.Error()})
 		return
@@ -243,7 +240,7 @@ func (r *Router) GetPersonCredits(c *gin.Context) {
 		c.Status(400)
 		return
 	}
-	content, err := r.tmdb.PersonCredits(c.Param("id"))
+	content, err := r.tmdb.PersonCredits(c.Param("id"), c.MustGet("userLanguage").(string))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, router.ErrorResponse{Error: err.Error()})
 		return

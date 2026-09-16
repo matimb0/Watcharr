@@ -47,6 +47,7 @@ func (s *Service) Search(
 	r domain.SearchRequest,
 	pp util.PaginationParams,
 	userId uint,
+	language string,
 ) (domain.SearchResponse, error) {
 	slog.Debug("Search: Running.", "request", r, "user_id", userId)
 
@@ -56,7 +57,7 @@ func (s *Service) Search(
 		return resp, errors.New("a query is required")
 	}
 
-	if s.searchExtProviderById(r.Query, &resp) {
+	if s.searchExtProviderById(r.Query, language, &resp) {
 		slog.Debug("Search: External provider id search worked.")
 		return resp, nil
 	}
@@ -80,6 +81,7 @@ func (s *Service) Search(
 			Query: query,
 			Page:  pp.Page,
 			Adult: qfilters.Adult,
+			Language: language,
 		}
 		greq := igdb.SearchOptions{
 			Query: query,
@@ -93,6 +95,7 @@ func (s *Service) Search(
 				Query: query,
 				Page:  pp.Page,
 				Adult: qfilters.Adult,
+				Language: language,
 			},
 			Year:        qfilters.Year,
 			PrimaryYear: qfilters.FirstYear,
@@ -106,6 +109,7 @@ func (s *Service) Search(
 				Query: query,
 				Page:  pp.Page,
 				Adult: qfilters.Adult,
+				Language: language,
 			},
 			Year:        qfilters.Year,
 			PrimaryYear: qfilters.FirstYear,
@@ -118,6 +122,7 @@ func (s *Service) Search(
 			Query: query,
 			Page:  pp.Page,
 			Adult: qfilters.Adult,
+			Language: language,
 		}
 		if err := s.searchPeople(sreq, &resp); err != nil {
 			return resp, errors.New("person search failed")
@@ -201,11 +206,14 @@ func (s *Service) searchMovie(
 
 func (s *Service) searchMovieById(
 	id string,
+	language string,
 	resp *domain.SearchResponse,
 ) error {
 	slog.Debug("searchMovieById: Running.", "id", id)
 	details, err := s.tmdb.MovieDetails(tmdb.MovieDetailsOptions{
 		ID: id,
+		Language: language,
+		DontRunDBCache: true,
 	})
 	if err != nil {
 		slog.Error("searchMovieById: Failed to search tmdb!", "error", err)
@@ -245,11 +253,14 @@ func (s *Service) searchShow(
 
 func (s *Service) searchTvById(
 	id string,
+	language string,
 	resp *domain.SearchResponse,
 ) error {
 	slog.Debug("searchTvById: Running.", "id", id)
 	details, err := s.tmdb.ShowDetails(tmdb.ShowDetailsOptions{
 		ID: id,
+		Language: language,
+		DontRunDBCache: true,
 	})
 	if err != nil {
 		slog.Error("searchTvById: Failed to search tmdb!", "error", err)

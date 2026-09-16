@@ -9,6 +9,7 @@
 	import { notify } from "../util/notify";
 	import AboutModal from "./AboutModal.svelte";
 	import { resolve } from "$app/paths";
+	import { t } from "@/lib/i18n";
 
 	let user = $derived(store.userInfo);
 	let proxyUserLogoutShown = $state(false);
@@ -41,7 +42,7 @@
 	}
 
 	function shareWatchedList() {
-		const nid = notify({ type: "loading", text: "Getting link" });
+		const nid = notify({ type: "loading", text: t("nav.getLink") });
 		const ud = parseTokenPayload();
 		console.log(ud);
 		if (ud?.userId && ud?.username) {
@@ -49,19 +50,19 @@
 			navigator.clipboard
 				.writeText(shareLink)
 				.then(() => {
-					notify({ id: nid, type: "success", text: "Copied share link" });
+					notify({ id: nid, type: "success", text: t("nav.copiedShareLink") });
 				})
 				.catch((r) => {
 					console.error("Failed to copy list share link", r);
 					notify({
 						id: nid,
 						type: "error",
-						text: `Failed to copy share link:<br/><a href="${shareLink}" target="_blank">${shareLink}</a>`,
+						text: `${t("nav.failedShareLink")}:<br/><a href="${shareLink}" target="_blank">${shareLink}</a>`,
 						time: 20000,
 					});
 				});
 		} else {
-			notify({ id: nid, type: "error", text: "Failed to get link" });
+			notify({ id: nid, type: "error", text: t("nav.failedGetLink") });
 		}
 	}
 
@@ -72,23 +73,23 @@
 
 <Menu conf={{ width: "140px", arrowRight: "10px" }}>
 	{#if user?.username}
-		<h5 title={user.username}>Hi {user.username}!</h5>
+		<h5 title={user.username}>{t("profile.greeting")} {user.username}!</h5>
 	{/if}
-	<button class="plain" onclick={() => profile()}>Profile</button>
+	<button class="plain" onclick={() => profile()}>{t("nav.profile")}</button>
 	{#if !store.userSettings?.private}
-		<button class="plain" onclick={() => shareWatchedList()}>Share List</button>
+		<button class="plain" onclick={() => shareWatchedList()}>{t("nav.shareList")}</button>
 	{/if}
 	{#if user && userHasPermission(user.permissions, UserPermission.PERM_ADMIN)}
-		<button class="plain" onclick={() => serverSettings()}>Settings</button>
-		<button class="plain" onclick={() => userManagement()}>Users</button>
+		<button class="plain" onclick={() => serverSettings()}>{t("nav.settings")}</button>
+		<button class="plain" onclick={() => userManagement()}>{t("nav.users")}</button>
 		{#if store.serverFeatures?.sonarr || store.serverFeatures?.radarr}
 			<!-- At least one (sonarr/radarr) should be enabled for requests menu item to display. -->
 			<button class="plain" onclick={() => requestManagement()}>
-				Requests
+				{t("nav.requests")}
 			</button>
 		{/if}
 	{/if}
-	<button class="plain" onclick={() => logout()}>Logout</button>
+	<button class="plain" onclick={() => logout()}>{t("nav.logout")}</button>
 	{#if proxyUserLogoutShown}
 		<ProxyUserLogoutModal onClose={() => (proxyUserLogoutShown = false)} />
 	{/if}
@@ -99,7 +100,7 @@
 				aboutModalOpen = !aboutModalOpen;
 			}}
 		>
-			about
+			{t("nav.about")}
 		</button>
 		|
 		<a

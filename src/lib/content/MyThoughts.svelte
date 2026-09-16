@@ -2,6 +2,7 @@
 	import Modal from "../Modal.svelte";
 	import Icon from "../Icon.svelte";
 	import { notify } from "../util/notify";
+	import { t } from "@/lib/i18n";
 
 	interface Props {
 		contentTitle?: string;
@@ -14,7 +15,7 @@
 	let modalOpen = $state(false);
 	let textarea: HTMLTextAreaElement | undefined = $state();
 	let thoughtsToDisplay = $derived(
-		thoughts ? thoughts : `Set thoughts on ${contentTitle}`,
+		thoughts ? thoughts : t("content.thoughts.set", { content: contentTitle ?? "this" }),
 	);
 
 	function resizeTextarea() {
@@ -45,12 +46,12 @@
 
 {#if modalOpen}
 	<Modal
-		title="Your Thoughts"
-		desc="View or modify your thoughts on {contentTitle}"
+		title={t("content.thoughts.your")}
+		desc={t("content.thoughts.description", { content: contentTitle ?? "this" })}
 		onClose={async () => {
 			if (!textarea) {
 				notify({
-					text: "Failed to find the text box! Please copy your changes to avoid losing them and try again!",
+					text: t("content.thoughts.failedBox"),
 				});
 				return;
 			}
@@ -63,7 +64,7 @@
 		<textarea
 			name="Thoughts"
 			rows="3"
-			placeholder={`My thoughts on ${contentTitle}`}
+			placeholder={t("content.thoughts.placeholder", { content: contentTitle ?? "this" })}
 			value={thoughts}
 			bind:this={textarea}
 			oninput={resizeTextarea}></textarea>

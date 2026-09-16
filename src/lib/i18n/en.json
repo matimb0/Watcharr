@@ -116,40 +116,22 @@
 		"mediocre": "Mediocre",
 		"liked": "Liked"
 	},
-	"common": {
-		"unknown": "Unknown",
-		"followedThoughts": "Followed Thoughts",
-		"noThoughts": "No thoughts yet.",
-		"failedFollowedThoughts": "Failed to load followed thoughts!",
-		"thoughts": "Thoughts",
-		"delete": "Delete",
-		"contentDeleteError": "Content has no watched list entry, can't delete."
-		,"videoEmbed": "Video Embed"
-		,"play": "Play"
-		,"plays": "Plays"
-		,"setThoughts": "Set thoughts on {content}"
-		,"yourThoughts": "Your Thoughts"
-		,"thoughtsDescription": "View or modify your thoughts on {content}"
-		,"thoughtsPlaceholder": "My thoughts on {content}"
-		,"failedThoughtsBox": "Failed to find the text box! Please copy your changes to avoid losing them and try again!"
-		,"removeFromList": "Remove From Your List?"
-		,"removeDescription": "This will delete {content} from your main list. Data will be lost."
-		,"removeConfirm": "Remove from my main list"
-		,"activity": "Activity"
-		,"noActivity": "You Have No Activity!"
-		,"automatedBecause": "Automated because {reason}"
-		,"completedAutomation": "Completed by an automation."
-		,"countsAsPlay": "Counts as a Play."
-		,"status": {
-			"planned": "Planned",
-			"watching": "Watching",
-			"playing": "Playing",
-			"finished": "Finished",
-			"played": "Played",
-			"hold": "On hold",
-			"dropped": "Dropped"
-		}
-		,"activityMessages": {
+	"status": {
+		"planned": "Planned",
+		"watching": "Watching",
+		"playing": "Playing",
+		"finished": "Finished",
+		"played": "Played",
+		"hold": "On hold",
+		"dropped": "Dropped"
+	},
+	"activity": {
+		"title": "Activity",
+		"empty": "You Have No Activity!",
+		"automatedBecause": "Automated because {reason}",
+		"completedAutomation": "Completed by an automation.",
+		"countsAsPlay": "Counts as a Play.",
+		"messages": {
 			"added": "Added to Watched List",
 			"removed": "Removed from Watched List",
 			"ratingChanged": "Rating Changed to {rating}",
@@ -182,7 +164,37 @@
 			"episodeStatusChangedSimple": "Episode Status Changed",
 			"episodeRemovedSimple": "Episode Removed"
 		}
-		,"deletionCallbackError": "The deletion callback no longer exists, so we couldn't delete this. Please try again."
+	},
+	"content": {
+		"unknown": "Unknown",
+		"videoEmbed": "Video Embed",
+		"play": "Play",
+		"plays": "Plays",
+		"followedThoughts": {
+			"title": "Followed Thoughts",
+			"empty": "No thoughts yet.",
+			"failed": "Failed to load followed thoughts!"
+		},
+		"thoughts": {
+			"title": "Thoughts",
+			"set": "Set thoughts on {content}",
+			"your": "Your Thoughts",
+			"description": "View or modify your thoughts on {content}",
+			"placeholder": "My thoughts on {content}",
+			"failedBox": "Failed to find the text box! Please copy your changes to avoid losing them and try again!",
+			"noThoughts": "No thoughts yet."
+		},
+		"removeFromList": {
+			"title": "Remove From Your List?",
+			"description": "This will delete {content} from your main list. Data will be lost.",
+			"confirm": "Remove from my main list"
+		},
+		"deleteError": "The deletion callback no longer exists, so we couldn't delete this. Please try again."
+	},
+	"common": {
+		"unknown": "Unknown",
+		"delete": "Delete",
+		"contentDeleteError": "Content has no watched list entry, can't delete."
 	},
 	"nav": {
 		"search": "Search",

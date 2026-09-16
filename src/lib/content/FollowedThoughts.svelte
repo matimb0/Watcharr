@@ -7,6 +7,7 @@
 	import Icon from "../Icon.svelte";
 	import { watchedStatuses } from "../util/helpers";
 	import { req } from "../util/api";
+	import { t } from "@/lib/i18n";
 
 	interface FollowThoughts {
 		followedUser: PublicUser;
@@ -36,7 +37,7 @@
 	<Spinner />
 {:then fts}
 	{#if fts?.length > 0}
-		<HorizontalList title="Followed Thoughts">
+		<HorizontalList title={t("content.followedThoughts.title")}>
 			{#each fts as ft (ft.followedUser.id)}
 				<button
 					class={["thoughts-card plain", ft.thoughts ? "" : "no-thoughts"].join(
@@ -59,19 +60,19 @@
 						{/if}
 					</div>
 					<div class="thought">
-						{ft.thoughts || "No thoughts yet."}
+						{ft.thoughts || t("content.followedThoughts.empty")}
 					</div>
 				</button>
 			{/each}
 		</HorizontalList>
 	{/if}
 {:catch err}
-	<Error error={err} pretty="Failed to load followed thoughts!" />
+	<Error error={err} pretty={t("content.followedThoughts.failed")} />
 {/await}
 
 {#if modalShownFor}
 	<Modal
-		title={`${modalShownFor.followedUser.username}'s Thoughts`}
+		title={`${modalShownFor.followedUser.username}'s ${t("content.thoughts.title")}`}
 		onClose={() => (modalShownFor = undefined)}
 	>
 		<span>{modalShownFor.thoughts}</span>

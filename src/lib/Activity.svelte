@@ -1,13 +1,13 @@
 <script lang="ts">
 	import type { Activity } from "@/types";
 	import {
-		getOrdinalSuffix,
-		months,
 		seasonAndEpToReadable,
 	} from "./util/helpers";
 	import ActivityEditor from "./ActivityEditor.svelte";
 	import Icon from "./Icon.svelte";
 	import tooltip from "./actions/tooltip";
+	import { t } from "@/lib/i18n";
+	import { store } from "@/store.svelte";
 
 	interface Props {
 		activity: Activity[] | undefined;
@@ -22,120 +22,120 @@
 	);
 
 	function getMsg(a: Activity) {
+		const status = (value: string | undefined) =>
+			value ? t(`status.${value.toLowerCase()}` as never) : t("common.unknown");
 		switch (a?.type) {
 			case "ADDED_WATCHED":
 				if (a.data) {
 					const data = JSON.parse(a.data);
-					return `Added to Watched List${data?.status ? ` as ${toFullTitleCase(data.status)}` : ""}${
-						data?.rating ? ` with ${data.rating} Stars` : ""
-					}`;
+					return `${t("activity.messages.added")}${data?.status ? ` ${status(data.status)}` : ""}${data?.rating ? ` (${data.rating})` : ""}`;
 				}
-				return "Added to Watched List";
+				return t("activity.messages.added");
 			case "REMOVED_WATCHED":
-				return "Removed from Watched List";
+				return t("activity.messages.removed");
 			case "RATING_CHANGED":
 				if (a.data) {
-					return `Rating Changed to ${a.data}`;
+					return t("activity.messages.ratingChanged", { rating: a.data });
 				}
-				return "Rating Changed";
+				return t("activity.messages.ratingChanged", { rating: "?" });
 			case "STATUS_CHANGED":
 				if (a.data) {
-					return `Status Changed to ${toFullTitleCase(a.data)}`;
+					return t("activity.messages.statusChanged", { status: status(a.data) });
 				}
-				return "Status Changed";
+				return t("activity.messages.statusChanged", { status: t("common.unknown") });
 			case "STATUS_CHANGED_AUTO":
 				if (a.data) {
 					const data = JSON.parse(a.data);
-					return `Status Changed to ${toFullTitleCase(data.status)}`;
+					return t("activity.messages.statusChanged", { status: status(data.status) });
 				}
-				return "Status Changed";
+				return t("activity.messages.statusChanged", { status: t("common.unknown") });
 			case "THOUGHTS_CHANGED":
-				return "Thoughts Changed";
+				return t("activity.messages.thoughtsChanged");
 			case "THOUGHTS_REMOVED":
-				return "Thoughts Removed";
+				return t("activity.messages.thoughtsRemoved");
 			case "IMPORTED_WATCHED":
-				return "Imported";
+				return t("activity.messages.imported");
 			case "IMPORTED_WATCHED_JF":
 			case "IMPORTED_WATCHED_PLEX":
-				return "Synced";
+				return t("activity.messages.synced");
 			case "IMPORTED_RATING":
 				if (a.data) {
 					const data = JSON.parse(a.data);
 					if (data.rating) {
-						return `Rating Changed to ${data.rating}`;
+						return t("activity.messages.ratingChanged", { rating: data.rating });
 					} else {
-						return "Added to Watchlist with No Rating";
+						return t("activity.messages.addedNoRating");
 					}
 				}
-				return "Imported Rating";
+				return t("activity.messages.importedRating");
 			case "IMPORTED_ADDED_WATCHED":
 			case "IMPORTED_ADDED_WATCHED_JF":
 			case "IMPORTED_ADDED_WATCHED_PLEX":
-				return "Imported Watch Date";
+				return t("activity.messages.importedWatchDate");
 			case "SEASON_ADDED":
 			case "SEASON_ADDED_AUTO":
 				if (a.data) {
 					const data = JSON.parse(a.data);
-					return `Season ${data.season} Added as ${toFullTitleCase(data.status)}`;
+					return t("activity.messages.seasonAdded", { season: data.season, status: status(data.status) });
 				}
-				return "Season Added";
+				return t("activity.messages.seasonAddedSimple");
 			case "SEASON_ADDED_JF":
 			case "SEASON_ADDED_PLEX":
 				if (a.data) {
 					const data = JSON.parse(a.data);
-					return `Season ${data.season} Synced as ${toFullTitleCase(data.status)}`;
+					return t("activity.messages.seasonSynced", { season: data.season, status: status(data.status) });
 				}
-				return "Season Synced";
+				return t("activity.messages.seasonSyncedSimple");
 			case "SEASON_RATING_CHANGED":
 				if (a.data) {
 					const data = JSON.parse(a.data);
-					return `Changed Season ${data.season} Rating to ${data.rating}`;
+					return t("activity.messages.seasonRatingChanged", { season: data.season, rating: data.rating });
 				}
-				return "Season Rating Changed";
+				return t("activity.messages.seasonRatingChangedSimple");
 			case "SEASON_STATUS_CHANGED":
 			case "SEASON_STATUS_CHANGED_AUTO":
 				if (a.data) {
 					const data = JSON.parse(a.data);
-					return `Changed Season ${data.season} Status to ${toFullTitleCase(data.status)}`;
+					return t("activity.messages.seasonStatusChanged", { season: data.season, status: status(data.status) });
 				}
-				return "Season Status Changed";
+				return t("activity.messages.seasonStatusChangedSimple");
 			case "SEASON_REMOVED":
 				if (a.data) {
 					const data = JSON.parse(a.data);
-					return `Season ${data.season} Status Removed`;
+					return t("activity.messages.seasonStatusRemoved", { season: data.season });
 				}
-				return "Season Removed";
+				return t("activity.messages.seasonRemoved");
 			case "EPISODE_ADDED":
 				if (a.data) {
 					const data = JSON.parse(a.data);
-					return `${seasonAndEpToReadable(data.season, data.episode)} Added ${data.status ? `as ${toFullTitleCase(data.status)}` : data.rating ? `with Rating ${data.rating}` : ""}`;
+					return t("activity.messages.episodeAdded", { episode: seasonAndEpToReadable(data.season, data.episode) });
 				}
-				return "Episode Added";
+				return t("activity.messages.episodeAddedSimple");
 			case "EPISODE_ADDED_JF":
 			case "EPISODE_ADDED_PLEX":
 				if (a.data) {
 					const data = JSON.parse(a.data);
-					return `${seasonAndEpToReadable(data.season, data.episode)} Synced ${data.status ? `as ${toFullTitleCase(data.status)}` : data.rating ? `with Rating ${data.rating}` : ""}`;
+					return t("activity.messages.episodeSynced", { episode: seasonAndEpToReadable(data.season, data.episode) });
 				}
-				return "Episode Synced";
+				return t("activity.messages.episodeSyncedSimple");
 			case "EPISODE_RATING_CHANGED":
 				if (a.data) {
 					const data = JSON.parse(a.data);
-					return `${seasonAndEpToReadable(data.season, data.episode)} Rating Changed to ${data.rating}`;
+					return t("activity.messages.episodeRatingChanged", { episode: seasonAndEpToReadable(data.season, data.episode), rating: data.rating });
 				}
-				return "Episode Rating Changed";
+				return t("activity.messages.episodeRatingChangedSimple");
 			case "EPISODE_STATUS_CHANGED":
 				if (a.data) {
 					const data = JSON.parse(a.data);
-					return `${seasonAndEpToReadable(data.season, data.episode)} Status Changed to ${toFullTitleCase(data.status)}`;
+					return t("activity.messages.episodeStatusChanged", { episode: seasonAndEpToReadable(data.season, data.episode), status: status(data.status) });
 				}
-				return "Episode Status Changed";
+				return t("activity.messages.episodeStatusChangedSimple");
 			case "EPISODE_REMOVED":
 				if (a.data) {
 					const data = JSON.parse(a.data);
-					return `${seasonAndEpToReadable(data.season, data.episode)} Removed`;
+					return t("activity.messages.episodeRemoved", { episode: seasonAndEpToReadable(data.season, data.episode) });
 				}
-				return "Episode Removed";
+				return t("activity.messages.episodeRemovedSimple");
 			default:
 				return a.type;
 		}
@@ -148,11 +148,12 @@
 				.map((l) => l[0].toUpperCase() + l.substring(1).toLowerCase())
 				.join(" ");
 		}
-		return "Unknown";
+		return t("common.unknown");
 	}
 
 	function toDayTime(d: Date) {
-		return `${d.getDate()}${getOrdinalSuffix(d.getDate())} at ${d.toLocaleTimeString()}`;
+		const locale = store.userSettings?.language === "de" ? "de-DE" : "en-US";
+		return new Intl.DateTimeFormat(locale, { dateStyle: "medium", timeStyle: "short" }).format(d);
 	}
 
 	/**
@@ -173,7 +174,8 @@
 			for (let i = 0; i < a.length; i++) {
 				const activity = a[i];
 				const date = new Date(getCreatedAtVis(activity));
-				const key = `${months[date.getMonth()]} ${date.getFullYear()}`;
+					const locale = store.userSettings?.language === "de" ? "de-DE" : "en-US";
+					const key = new Intl.DateTimeFormat(locale, { month: "long", year: "numeric" }).format(date);
 				if (grouped[key]) {
 					grouped[key].push(activity);
 				} else {
@@ -228,7 +230,7 @@
 {/if}
 
 <div class="activity">
-	<h2>Activity</h2>
+	<h2>{t("activity.title")}</h2>
 	{#if groupedActivities && Object.keys(groupedActivities).length > 0}
 		<ul>
 			{#each Object.keys(groupedActivities) as k (k)}
@@ -247,8 +249,8 @@
 								use:tooltip={{
 									text:
 										data && data.reason
-											? `Automated because ${data.reason}`
-											: "Completed by an automation.",
+											? t("activity.automatedBecause", { reason: data.reason })
+											: t("activity.completedAutomation"),
 									pos: "top",
 								}}
 								style="width: 20px; height: 20px;"
@@ -259,7 +261,7 @@
 						{#if a.countAsPlay}
 							<i
 								use:tooltip={{
-									text: "Counts as a Play.",
+									text: t("activity.countsAsPlay"),
 									pos: "top",
 								}}
 								style="width: 20px; height: 20px;"
@@ -272,7 +274,7 @@
 			{/each}
 		</ul>
 	{:else}
-		<span>You Have No Activity!</span>
+		<span>{t("activity.empty")}</span>
 	{/if}
 </div>
 

@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { MediaGenre } from "@/types";
+	import { t } from "@/lib/i18n";
 
 	interface Props {
 		genres?: MediaGenre[];
@@ -18,7 +19,7 @@
 	{:else}
 		<!-- Generic "unknown" text, since this component
 		 	 is also used for displaying Game Modes. -->
-		<span>Unknown</span>
+		<span>{t("content.unknown")}</span>
 	{/if}
 </div>
 

@@ -11,6 +11,7 @@
 	import paginatedLoader from "@/lib/util/paginatedLoader.svelte";
 	import { clearActiveFilters, store } from "@/store.svelte";
 	import { type Media, type PaginationResponse } from "@/types";
+	import { t } from "@/lib/i18n";
 	import { onDestroy, untrack } from "svelte";
 
 	const scroll = infScroll({ callback: onScrollToBottom });
@@ -70,7 +71,7 @@
 </script>
 
 <svelte:head>
-	<title>Watched List</title>
+	<title>{t("home.title")}</title>
 </svelte:head>
 
 <!-- <span
@@ -102,16 +103,17 @@
 	{:else if !dataLoader.state.reqLoading && !dataLoader.state.reqLoadError}
 		<div class="empty-list">
 			<Icon i={store.hasActiveFilters ? "filter-circle" : "reel"} wh={80} />
-			<h2 class="norm">Your list looks empty!</h2>
+			<h2 class="norm">{t("home.emptyTitle")}</h2>
 			<h4 class="norm">
-				Try {`${store.hasActiveFilters ? "removing your active filters or" : ""}`}
-				searching for something you would like to add.
+				{store.hasActiveFilters
+					? t("home.emptyDescriptionWithFilters")
+					: t("home.emptyDescription")}
 			</h4>
 			{#if !store.hasActiveFilters}
-				<button onclick={() => goto(resolve("/import"))}>Import</button>
+				<button onclick={() => goto(resolve("/import"))}>{t("home.import")}</button>
 			{/if}
 			{#if store.hasActiveFilters}
-				<button onclick={() => clearActiveFilters()}>Clear Filters</button>
+				<button onclick={() => clearActiveFilters()}>{t("home.clearFilters")}</button>
 			{/if}
 		</div>
 	{/if}
@@ -126,7 +128,7 @@
 {#if dataLoader.state.reqLoadError}
 	<div style="margin-bottom: 60px;">
 		<Error
-			pretty="Failed to load results!"
+			pretty={t("home.failedResults")}
 			error={dataLoader.state.reqLoadError}
 			onRetry={() => {
 				dataLoader.state.reqLoadError = undefined;

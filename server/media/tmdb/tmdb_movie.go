@@ -13,6 +13,7 @@ type MovieDetailsOptions struct {
 	ID string
 	// Country (currently used for watch providers)
 	Country string
+	Language string
 	// Request params map.
 	Params map[string]string
 
@@ -29,11 +30,17 @@ func (t *TMDB) MovieDetails(o MovieDetailsOptions) (MovieDetails, error) {
 		o.ID,
 		o.Country,
 		o.Params)
+	cacheKey = cache.CreateCacheKey(cacheKey, o.Language)
+	params := o.Params
+	if params == nil {
+		params = map[string]string{}
+	}
+	params["language"] = o.Language
 	if cache.GetCache(ContentStore, cacheKey, &resp) {
 		slog.Debug("MovieDetails: Returning cache.")
 		return *resp, nil
 	}
-	err := t.req("/movie/"+o.ID, o.Params, &resp)
+	err := t.req("/movie/"+o.ID, params, &resp)
 	if err != nil {
 		slog.Error("MovieDetails: Request failed!", "error", err)
 		return MovieDetails{}, errors.New("request failed")
@@ -51,9 +58,9 @@ func (t *TMDB) MovieDetails(o MovieDetailsOptions) (MovieDetails, error) {
 	return *resp, nil
 }
 
-func (t *TMDB) MovieCredits(id string) (ContentCredits, error) {
+func (t *TMDB) MovieCredits(id string, language string) (ContentCredits, error) {
 	resp := new(ContentCredits)
-	err := t.req("/movie/"+id+"/credits", map[string]string{}, &resp)
+	err := t.req("/movie/"+id+"/credits", map[string]string{"language": language}, &resp)
 	if err != nil {
 		slog.Error("MovieCredits: Request failed!", "error", err)
 		return ContentCredits{}, errors.New("request failed")

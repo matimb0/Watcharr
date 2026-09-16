@@ -11,9 +11,14 @@ export type TranslationKey =
 	| `home.${keyof typeof en.home & string}`
 	| `nav.${keyof typeof en.nav & string}`
 	| `details.${keyof typeof en.details & string}`
+	| `status.${keyof typeof en.status & string}`
+	| `activity.${keyof typeof en.activity & string}`
+	| `activity.messages.${keyof typeof en.activity.messages & string}`
+	| `content.${keyof typeof en.content & string}`
+	| `content.followedThoughts.${keyof typeof en.content.followedThoughts & string}`
+	| `content.thoughts.${keyof typeof en.content.thoughts & string}`
+	| `content.removeFromList.${keyof typeof en.content.removeFromList & string}`
 	| `common.${keyof typeof en.common & string}`
-	| `common.status.${keyof typeof en.common.status & string}`
-	| `common.activityMessages.${keyof typeof en.common.activityMessages & string}`
 	| `rating.${keyof typeof en.rating & string}`
 	| `rating.ratingDescriptions.${keyof typeof en.rating.ratingDescriptions & string}`;
 

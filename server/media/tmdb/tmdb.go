@@ -55,8 +55,12 @@ func (t *TMDB) apiRequest(ep string, p map[string]string) ([]byte, error) {
 	// Query params
 	params := url.Values{}
 	params.Add("api_key", t.GetKey())
-	params.Add("language", "en-US")
+	language := normalizeLanguage(p["language"])
+	params.Add("language", language)
 	for k, v := range p {
+		if k == "language" {
+			continue
+		}
 		params.Add(k, v)
 	}
 
@@ -78,6 +82,17 @@ func (t *TMDB) apiRequest(ep string, p map[string]string) ([]byte, error) {
 		return nil, errors.New(string(body))
 	}
 	return body, nil
+}
+
+func normalizeLanguage(language string) string {
+	switch language {
+	case "de", "de-DE":
+		return "de-DE"
+	case "en", "en-US", "":
+		return "en-US"
+	default:
+		return "en-US"
+	}
 }
 
 func (t *TMDB) req(ep string, p map[string]string, resp interface{}) error {

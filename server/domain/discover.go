@@ -35,6 +35,7 @@ type DiscoverRequest struct {
 type DiscoverRequestMeta struct {
 	PageParams util.PaginationParams
 	Region     string
+	Language   string
 }
 
 type DiscoverResponse struct {

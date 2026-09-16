@@ -259,6 +259,7 @@ func (s *Service) GetOrCacheContent(
 		case entity.MOVIE:
 			resp, err := s.tmdb.MovieDetails(tmdb.MovieDetailsOptions{
 				ID:             tmdbId,
+				Language:       "en",
 				DontRunDBCache: true,
 			})
 			if err != nil {
@@ -277,6 +278,7 @@ func (s *Service) GetOrCacheContent(
 		case entity.SHOW:
 			resp, err := s.tmdb.ShowDetails(tmdb.ShowDetailsOptions{
 				ID:             tmdbId,
+				Language:       "en",
 				DontRunDBCache: true,
 			})
 			if err != nil {
@@ -299,5 +301,83 @@ func (s *Service) GetOrCacheContent(
 		}
 
 	}
+	if _, err := s.GetOrCacheContentTranslation(content, "en"); err != nil {
+		slog.Warn("GetOrCacheContent: Failed to cache English content translation", "error", err)
+	}
 	return content, nil
+}
+
+func (s *Service) GetOrCacheContentTranslation(
+	content entity.Content,
+	language string,
+) (entity.ContentTranslation, error) {
+	translation := entity.ContentTranslation{}
+	res := s.db.Where("content_id = ? AND language = ?", content.ID, language).
+		First(&translation)
+	if res.Error == nil {
+		return translation, nil
+	}
+	if !errors.Is(res.Error, gorm.ErrRecordNotFound) {
+		return translation, res.Error
+	}
+	if language == "en" || language == "en-US" {
+		translation = entity.ContentTranslation{
+			ContentID: content.ID,
+			Language:  "en",
+			Title:     content.Title,
+			Overview:  content.Overview,
+		}
+		res = s.db.Clauses(clause.OnConflict{
+			Columns: []clause.Column{
+				{Name: "content_id"},
+				{Name: "language"},
+			},
+			DoUpdates: clause.AssignmentColumns([]string{"title", "overview"}),
+		}).Create(&translation)
+		return translation, res.Error
+	}
+
+	id := strconv.Itoa(content.TmdbID)
+	translation = entity.ContentTranslation{
+		ContentID: content.ID,
+		Language:  language,
+	}
+	switch content.Type {
+	case entity.MOVIE:
+		details, err := s.tmdb.MovieDetails(tmdb.MovieDetailsOptions{
+			ID:             id,
+			Language:       language,
+			DontRunDBCache: true,
+		})
+		if err != nil {
+			return translation, err
+		}
+		translation.Title = details.Title
+		translation.Overview = details.Overview
+	case entity.SHOW:
+		details, err := s.tmdb.ShowDetails(tmdb.ShowDetailsOptions{
+			ID:             id,
+			Language:       language,
+			DontRunDBCache: true,
+		})
+		if err != nil {
+			return translation, err
+		}
+		translation.Title = details.Name
+		translation.Overview = details.Overview
+	default:
+		return translation, errors.New("unsupported content type")
+	}
+
+	res = s.db.Clauses(clause.OnConflict{
+		Columns: []clause.Column{
+			{Name: "content_id"},
+			{Name: "language"},
+		},
+		DoUpdates: clause.AssignmentColumns([]string{"title", "overview"}),
+	}).Create(&translation)
+	if res.Error != nil {
+		return entity.ContentTranslation{}, res.Error
+	}
+	return translation, nil
 }

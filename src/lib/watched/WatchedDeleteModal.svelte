@@ -1,5 +1,6 @@
 <script lang="ts">
 	import Modal from "../Modal.svelte";
+	import { t } from "@/lib/i18n";
 
 	interface Props {
 		mediaName?: string;
@@ -13,16 +14,16 @@
 </script>
 
 <Modal
-	title="Remove From Your List?"
+	title={t("content.removeFromList.title")}
 	onClose={() => onClose(false)}
 	maxWidth="650px"
 >
 	<div class="remove-ctr">
 		<p>
-			This will delete <b>{mediaName}</b> from your main list. Data will be lost.
+			{t("content.removeFromList.description", { content: mediaName ?? "this content" })}
 		</p>
 		<button class="confirm-delete-btn" onclick={() => onClose(true)}>
-			Remove from my main list.
+			{t("content.removeFromList.confirm")}
 		</button>
 	</div>
 </Modal>
