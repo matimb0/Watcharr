@@ -29,3 +29,13 @@ function activityRemovedUpdateWatchedPlays(
 		w.plays--;
 	}
 }
+
+/**
+ * Update local watched state with new `plays` when updating activity.
+ */
+export function activityUpdatedHook(w?: Watched) {
+	if (!w || !w.activity) {
+		return;
+	}
+	w.plays = w.activity.reduce((n, a) => n + (a.countAsPlay ? 1 : 0), 0);
+}

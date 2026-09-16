@@ -35,7 +35,7 @@
 	import ExpandableText from "@/lib/content/ExpandableText.svelte";
 	import WatchedDeleteBtn from "@/lib/content/WatchedDeleteBtn.svelte";
 	import TopCrewList from "@/lib/content/TopCrewList.svelte";
-	import { activityRemovedHook } from "@/lib/activity.js";
+	import { activityRemovedHook, activityUpdatedHook } from "@/lib/activity.js";
 	import CountAsPlayModal from "@/lib/watched/CountAsPlayModal.svelte";
 	import { createSignal, type Signal } from "@/lib/util/signal.js";
 	import Genres from "@/lib/content/Genres.svelte";
@@ -315,6 +315,7 @@
 				<Activity
 					activity={show.watched.activity}
 					onRemoved={(a) => activityRemovedHook(show?.watched, a)}
+					onUpdated={() => activityUpdatedHook(show?.watched)}
 				/>
 			{/if}
 

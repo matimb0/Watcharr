@@ -77,13 +77,20 @@ func (s *Service) UpdateActivity(
 	if id == 0 {
 		return errors.New("id must be set to update an activity")
 	}
-	if activityUpdateRequest.CustomDate.IsZero() {
-		return errors.New("customDate must be set to update an activity")
+	updates := map[string]any{}
+	if !activityUpdateRequest.CustomDate.IsZero() {
+		updates["custom_date"] = activityUpdateRequest.CustomDate
+	}
+	if activityUpdateRequest.CountAsPlay != nil {
+		updates["count_as_play"] = *activityUpdateRequest.CountAsPlay
+	}
+	if len(updates) == 0 {
+		return errors.New("customDate or countAsPlay must be set to update an activity")
 	}
 	res := s.db.
 		Model(&entity.Activity{}).
 		Where("user_id = ? AND id = ?", userId, id).
-		Update("custom_date", activityUpdateRequest.CustomDate)
+		Updates(updates)
 	if res.Error != nil {
 		slog.Error("Error updating activity in database",
 			"error", res.Error.Error())
