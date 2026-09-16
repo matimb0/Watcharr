@@ -12,9 +12,14 @@
 	interface Props {
 		activity: Activity[] | undefined;
 		onRemoved: (activity: Activity) => void;
+		onUpdated?: () => void;
 	}
 
-	let { activity = undefined, onRemoved }: Props = $props();
+	let {
+		activity = undefined,
+		onRemoved,
+		onUpdated = () => {},
+	}: Props = $props();
 
 	let clickedActivity: Activity | undefined = $state();
 	let groupedActivities: { [index: string]: Activity[] } = $derived(
@@ -216,6 +221,7 @@
 			}
 			const ai = activity.findIndex((a) => a.id === activityId);
 			activity[ai] = updatedActivity;
+			onUpdated();
 		}}
 		onRemoved={(a) => {
 			if (!activity) {

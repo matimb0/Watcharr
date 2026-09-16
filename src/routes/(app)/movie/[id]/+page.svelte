@@ -29,7 +29,7 @@
 	import ExpandableText from "@/lib/content/ExpandableText.svelte";
 	import WatchedDeleteBtn from "@/lib/content/WatchedDeleteBtn.svelte";
 	import TopCrewList from "@/lib/content/TopCrewList.svelte";
-	import { activityRemovedHook } from "@/lib/activity.js";
+	import { activityRemovedHook, activityUpdatedHook } from "@/lib/activity.js";
 	import Genres from "@/lib/content/Genres.svelte";
 	import { t } from "@/lib/i18n";
 
@@ -289,6 +289,7 @@
 				<Activity
 					activity={movie.watched.activity}
 					onRemoved={(a) => activityRemovedHook(movie?.watched, a)}
+					onUpdated={() => activityUpdatedHook(movie?.watched)}
 				/>
 			{/if}
 		</div>
