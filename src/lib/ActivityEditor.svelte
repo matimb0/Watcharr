@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { updateActivity, removeActivity } from "@/lib/util/api";
 	import Modal from "./Modal.svelte";
+	import Checkbox from "./Checkbox.svelte";
 	import type { Activity } from "@/types";
 	import { notify } from "./util/notify";
 
@@ -26,6 +27,10 @@
 	let isDateTimeChanged: boolean = $derived(
 		currentDateString != selectedDateString ||
 			currentTimeString != selectedTimeString,
+	);
+	let isCountAsPlayChecked = $state(activity.countAsPlay);
+	let isCountAsPlayChanged: boolean = $derived(
+		isCountAsPlayChecked != activity.countAsPlay,
 	);
 
 	function dateToInputDateString(date: Date) {
@@ -60,24 +65,36 @@
 	}
 
 	async function update() {
-		const dateObj = validateNewDate();
-		if (dateObj && isDateTimeValid && isDateTimeChanged) {
-			const updatedActivity = await updateActivity(activity, dateObj);
-			if (!updatedActivity) {
-				// Failed..
+		// Only validate/send the date if the user actually changed it.
+		let dateObj: Date | undefined;
+		if (isDateTimeChanged) {
+			dateObj = validateNewDate();
+			if (!dateObj || !isDateTimeValid) {
+				notify({ text: "New date is invalid!", type: "error" });
+				console.error(
+					"ActivityEditor: Can't try updating, new date is invalid:",
+					selectedDateString,
+					selectedTimeString,
+				);
 				return;
 			}
-			onUpdated(updatedActivity.id, updatedActivity);
-			onClose();
+		}
+		// Nothing to do if neither field was changed.
+		if (!dateObj && !isCountAsPlayChanged) {
+			notify({ text: "Nothing was changed to update!", type: "error" });
 			return;
 		}
-		notify({ text: "Unable to try updating!", type: "error" });
-		console.error(
-			"ActivityEditor: Can't try updating, data missing/invalid:",
+		const updatedActivity = await updateActivity(
+			activity,
 			dateObj,
-			isDateTimeValid,
-			isDateTimeChanged,
+			isCountAsPlayChanged ? isCountAsPlayChecked : undefined,
 		);
+		if (!updatedActivity) {
+			// Failed..
+			return;
+		}
+		onUpdated(updatedActivity.id, updatedActivity);
+		onClose();
 	}
 
 	async function remove() {
@@ -108,12 +125,23 @@
 			onchange={validateNewDate}
 		/>
 
+		<div class="countasplay">
+			<h3>Count as Play</h3>
+			<Checkbox
+				name="activity-count-as-play"
+				bind:value={isCountAsPlayChecked}
+			/>
+		</div>
+
 		<div class="button-row">
 			<button class="danger" onclick={remove}>Delete</button>
 			<div>
 				<button
 					onclick={update}
-					disabled={!(isDateTimeChanged && isDateTimeValid)}>Update</button
+					disabled={!(
+						(isDateTimeChanged || isCountAsPlayChanged) &&
+						isDateTimeValid
+					)}>Update</button
 				>
 			</div>
 		</div>
@@ -134,6 +162,17 @@
 				system-ui,
 				-apple-system,
 				BlinkMacSystemFont;
+		}
+
+		.countasplay {
+			display: flex;
+			flex-flow: row;
+			align-items: center;
+			justify-content: space-between;
+
+			h3 {
+				margin: 0;
+			}
 		}
 
 		.button-row {

@@ -207,17 +207,26 @@ export async function removeWatched(id: number): Promise<boolean> {
 
 export async function updateActivity(
 	activity: Activity,
-	date: Date,
+	date?: Date,
+	countAsPlay?: boolean,
 ): Promise<Activity | undefined> {
 	const nid = notify({ text: "Updating", type: "loading" });
-	console.debug("updateActivity:", activity, date);
+	console.debug("updateActivity:", activity, date, countAsPlay);
 	try {
 		const resp = await req.putWhole(`/activity/${activity.id}`, {
-			customDate: date.toISOString(),
+			...(typeof date !== "undefined" && {
+				customDate: date.toISOString(),
+			}),
+			...(typeof countAsPlay !== "undefined" && { countAsPlay }),
 		} as ActivityUpdateRequest);
 		console.log("updateActivity: Response status:", resp.status);
 		if (activity) {
-			activity.customDate = date.toISOString();
+			if (typeof date !== "undefined") {
+				activity.customDate = date.toISOString();
+			}
+			if (typeof countAsPlay !== "undefined") {
+				activity.countAsPlay = countAsPlay;
+			}
 		}
 		notify({ id: nid, text: "Updated!", type: "success" });
 		return activity;

@@ -16,7 +16,8 @@ type (
 	}
 
 	ActivityUpdateRequest struct {
-		CustomDate time.Time `json:"customDate" binding:"required"`
+		CustomDate  time.Time `json:"customDate"`
+		CountAsPlay *bool     `json:"countAsPlay"`
 	}
 
 	ActivityAddProvider interface {

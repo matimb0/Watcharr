@@ -16,7 +16,7 @@
 	import PosterImage from "@/lib/content/PosterImage.svelte";
 	import ExpandableText from "@/lib/content/ExpandableText.svelte";
 	import WatchedDeleteBtn from "@/lib/content/WatchedDeleteBtn.svelte";
-	import { activityRemovedHook } from "@/lib/activity.js";
+	import { activityRemovedHook, activityUpdatedHook } from "@/lib/activity.js";
 	import Genres from "@/lib/content/Genres.svelte";
 	import SimilarContent from "@/lib/content/SimilarContent.svelte";
 
@@ -187,6 +187,7 @@
 				<Activity
 					activity={game.watched.activity}
 					onRemoved={(a) => activityRemovedHook(game?.watched, a)}
+					onUpdated={() => activityUpdatedHook(game?.watched)}
 				/>
 			{/if}
 		</div>

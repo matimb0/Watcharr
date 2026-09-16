@@ -194,7 +194,8 @@ export interface WatchedGetPageRequest {
 }
 
 export interface ActivityUpdateRequest {
-	customDate: string;
+	customDate?: string;
+	countAsPlay?: boolean;
 }
 
 export interface WatchedSeasonAddResponse {
