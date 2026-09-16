@@ -6,6 +6,7 @@
 	import Tag from "./Tag.svelte";
 	import DeleteTagModal from "./DeleteTagModal.svelte";
 	import Menu, { type MenuConfig } from "../Menu.svelte";
+	import { t as translate } from "@/lib/i18n";
 
 	interface Props {
 		titleText?: string | undefined;
@@ -48,7 +49,7 @@
 
 <Menu conf={Object.assign(defaultMenuConfig, menuConfig)}>
 	<div class="title">
-		<h4 class="norm sm-caps">{titleText ? titleText : "my tags"}</h4>
+		<h4 class="norm sm-caps">{titleText ? titleText : translate("nav.myTags")}</h4>
 		{#if showManageBtn}
 			<button
 				class={["plain", inManageMode ? "manage-on" : ""].join(" ")}
@@ -64,7 +65,7 @@
 	{#if allTags && allTags.length > 0}
 		{#if inManageMode}
 			<strong style="font-size: 12px; margin-bottom: 10px;"
-				>Click a tag to delete it.</strong
+				>{translate("nav.clickTagDelete")}</strong
 			>
 		{/if}
 		<div class="list">
@@ -87,7 +88,7 @@
 			{/each}
 		</div>
 	{:else}
-		<span style="margin-top: 0;">You have no tags yet!</span>
+		<span style="margin-top: 0;">{translate("nav.noTags")}</span>
 	{/if}
 </Menu>
 

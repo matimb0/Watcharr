@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { MediaVideoType, type MediaVideo } from "@/types";
 	import VideoEmbedModal from "./VideoEmbedModal.svelte";
+	import { t } from "@/lib/i18n";
 
 	interface Props {
 		videos?: MediaVideo[];
@@ -25,7 +26,7 @@
 </script>
 
 {#if trailer}
-	<button onclick={() => (trailerShown = !trailerShown)}>View Trailer</button>
+	<button onclick={() => (trailerShown = !trailerShown)}>{t("details.viewTrailer")}</button>
 	{#if trailerShown}
 		<VideoEmbedModal embed={trailer} closed={() => (trailerShown = false)} />
 	{/if}

@@ -3,6 +3,7 @@
 	import Rating from "../rating/Rating.svelte";
 	import Status from "../Status.svelte";
 	import MyThoughts from "./MyThoughts.svelte";
+	import { t } from "@/lib/i18n";
 
 	interface Props {
 		watched?: Watched;
@@ -33,7 +34,7 @@
 		{#if typeof watched.plays == "number" && watched.plays > 0}
 			<div>
 				{watched.plays}
-				{watched.plays > 1 ? "Plays" : "Play"}
+				{watched.plays > 1 ? t("content.plays") : t("content.play")}
 			</div>
 		{/if}
 	{/if}

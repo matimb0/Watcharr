@@ -47,6 +47,9 @@ func (s *Service) UserUpdate(userId uint, ur entity.UserSettings) (entity.UserSe
 	if ur.Country != nil {
 		user.Country = ur.Country
 	}
+	if ur.Language != nil {
+		user.Language = ur.Language
+	}
 	if ur.RatingSystem != nil {
 		user.RatingSystem = ur.RatingSystem
 	}
@@ -61,6 +64,7 @@ func (s *Service) UserUpdate(userId uint, ur entity.UserSettings) (entity.UserSe
 		IncludePreviouslyWatched: user.IncludePreviouslyWatched,
 		AutomateShowStatuses:     user.AutomateShowStatuses,
 		Country:                  user.Country,
+		Language:                 user.Language,
 	}, nil
 }
 
@@ -79,6 +83,7 @@ func (s *Service) UserGetSettings(userId uint) (entity.UserSettings, error) {
 		IncludePreviouslyWatched: user.IncludePreviouslyWatched,
 		AutomateShowStatuses:     user.AutomateShowStatuses,
 		Country:                  user.Country,
+		Language:                 user.Language,
 		RatingSystem:             user.RatingSystem,
 		RatingStep:               user.RatingStep,
 	}, nil

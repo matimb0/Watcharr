@@ -45,6 +45,7 @@ func (s *Service) importWithName(
 		searchReq,
 		util.PaginationParams{Page: 1},
 		userId,
+		"en",
 	)
 	if err != nil {
 		slog.Error("importWithName: Search failed", "error", err)
@@ -151,7 +152,7 @@ func (s *Service) importWithIMDBID(
 	userId uint,
 	ar *domain.ImportRequest,
 ) (domain.ImportResponse, error) {
-	if imdbResp, err := s.tmdb.SearchByExternalId(ar.ImdbID, "imdb"); err == nil {
+	if imdbResp, err := s.tmdb.SearchByExternalId(ar.ImdbID, "imdb", "en"); err == nil {
 		if len(imdbResp.Results) == 1 {
 			onlyResult := imdbResp.Results[0]
 			if onlyResult.MediaType == string(entity.MOVIE) || onlyResult.MediaType == string(entity.SHOW) {

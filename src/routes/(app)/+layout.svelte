@@ -24,6 +24,7 @@
 	} from "@/types";
 	import { onMount } from "svelte";
 	import { SvelteURLSearchParams } from "svelte/reactivity";
+	import { t } from "@/lib/i18n";
 	interface Props {
 		children?: import("svelte").Snippet;
 	}
@@ -249,7 +250,7 @@
 			<input
 				bind:this={mainSearchEl}
 				type="text"
-				placeholder="Search"
+				placeholder={t("nav.search")}
 				bind:value={store.searchQuery}
 				onkeydown={handleSearch}
 			/>
@@ -265,7 +266,7 @@
 						detailedMenuShown = !detailedMenuShown;
 					}}
 					use:tooltip={{
-						text: "Detailed View",
+						text: t("nav.detailedView"),
 						pos: "bot",
 						condition: !detailedMenuShown,
 					}}
@@ -287,7 +288,7 @@
 						closeAllSubMenus("sort");
 						sortMenuShown = !sortMenuShown;
 					}}
-					use:tooltip={{ text: "Sort", pos: "bot", condition: !sortMenuShown }}
+					use:tooltip={{ text: t("nav.sort"), pos: "bot", condition: !sortMenuShown }}
 				>
 					<Icon i="sort" />
 					<!-- Show indicator if not equal to default and second item in array is not falsy -->
@@ -302,7 +303,7 @@
 						filterMenuShown = !filterMenuShown;
 					}}
 					use:tooltip={{
-						text: "Filter",
+						text: t("nav.filter"),
 						pos: "bot",
 						condition: !filterMenuShown,
 					}}
@@ -325,7 +326,7 @@
 					closeAllSubMenus("tag");
 					tagMenuShown = !tagMenuShown;
 				}}
-				use:tooltip={{ text: "Tags", pos: "bot", condition: !tagMenuShown }}
+				use:tooltip={{ text: t("nav.tags"), pos: "bot", condition: !tagMenuShown }}
 			>
 				<Icon i="tag" />
 			</button>
@@ -341,7 +342,7 @@
 			<button
 				class="plain other discover"
 				onclick={() => goto(resolve("/discover"))}
-				use:tooltip={{ text: "Discover", pos: "bot" }}
+				use:tooltip={{ text: t("nav.discover"), pos: "bot" }}
 			>
 				<Icon i="compass" wh={26} />
 			</button>
@@ -352,7 +353,7 @@
 					followingMenuShown = !followingMenuShown;
 				}}
 				use:tooltip={{
-					text: "Following",
+					text: t("nav.following"),
 					pos: "bot",
 					condition: !followingMenuShown,
 				}}
@@ -371,7 +372,7 @@
 	<input
 		class="small"
 		type="text"
-		placeholder="Search"
+		placeholder={t("nav.search")}
 		bind:value={store.searchQuery}
 		onkeydown={handleSearch}
 	/>

@@ -40,6 +40,7 @@
 	import { createSignal, type Signal } from "@/lib/util/signal.js";
 	import Genres from "@/lib/content/Genres.svelte";
 	import { MediaStatusShow } from "@/lib/types/mediaStatus.js";
+	import { t } from "@/lib/i18n";
 
 	let { data } = $props();
 
@@ -138,11 +139,11 @@
 </script>
 
 <svelte:head>
-	<title>{show?.name ? `${show.name} - ` : ""}Show</title>
+	<title>{show?.name ? `${show.name} - ` : ""}{t("details.show")}</title>
 </svelte:head>
 
 {#if pageError}
-	<Error pretty="Failed to load tv show!" error={pageError} />
+	<Error pretty={t("details.failedShow")} error={pageError} />
 {:else if !show}
 	<Spinner />
 {:else if Object.keys(show).length > 0}
@@ -194,9 +195,9 @@
 									target="_blank"
 								>
 									{#if localStorage.getItem("useEmby")}
-										<Icon i="emby" wh={14} />Play On Emby
+										<Icon i="emby" wh={14} />{t("details.playOn")} Emby
 									{:else}
-										<Icon i="jellyfin" wh={14} />Play On Jellyfin
+										<Icon i="jellyfin" wh={14} />{t("details.playOn")} Jellyfin
 									{/if}
 								</a>
 							{/if}
@@ -221,7 +222,11 @@
 											}
 										}}
 										use:tooltip={{
-											text: `${show.watched?.pinned ? "Unpin from" : "Pin to"} top of list`,
+											text: t(
+												show.watched?.pinned
+													? "details.unpinFromTopList"
+													: "details.pinToTopList",
+											),
 											pos: "bot",
 										}}
 									>
@@ -291,7 +296,7 @@
 				{/if}
 
 				{#if credits.cast?.length > 0}
-					<HorizontalList title="Cast">
+					<HorizontalList title={t("details.cast")}>
 						{#each credits.cast?.slice(0, 50) as cast (cast.credit_id)}
 							<PersonPoster
 								id={cast.id}
@@ -304,7 +309,7 @@
 					</HorizontalList>
 				{/if}
 			{:catch err}
-				<Error error={err} pretty="Failed to load cast!" />
+				<Error error={err} pretty={t("details.failedCast")} />
 			{/await}
 
 			{#if show.similar}
@@ -335,7 +340,7 @@
 		</div>
 	</div>
 {:else}
-	Show not found
+	{t("details.show")} {t("details.notFound")}
 {/if}
 
 <style lang="scss">

@@ -34,7 +34,7 @@ func NewRouter(br *router.BaseRouter, service *Service, watchedProvider WatchedP
 }
 
 func (r *Router) AddRoutes() {
-	search := r.br.Router.Group("/search").Use(authmiddleware.AuthRequired(nil, r.br.Cfg))
+	search := r.br.Router.Group("/search").Use(authmiddleware.AuthRequired(r.br.DB, r.br.Cfg))
 
 	// Master search
 	search.GET("", router.PaginatedRequest(true), r.GetSearch)
@@ -64,7 +64,7 @@ func (r *Router) GetSearch(c *gin.Context) {
 		)
 		return
 	}
-	resp, err := r.service.Search(req, pp, userId)
+	resp, err := r.service.Search(req, pp, userId, c.MustGet("userLanguage").(string))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, router.ErrorResponse{Error: err.Error()})
 		return

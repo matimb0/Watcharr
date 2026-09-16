@@ -3,6 +3,7 @@
 	import Setting from "../settings/Setting.svelte";
 	import { RatingStep, RatingSystem } from "@/types";
 	import { updateUserSetting } from "../util/api";
+	import { t } from "@/lib/i18n";
 
 	function update(v: RatingSystem) {
 		if (!store.userSettings) {
@@ -25,7 +26,10 @@
 	}
 </script>
 
-<Setting title="Rating System" desc="How would you like to rate content?">
+<Setting
+	title={t("profile.rating.system")}
+	desc={t("profile.rating.systemDescription")}
+>
 	<div class="rat-wrap">
 		<button
 			class={[
@@ -70,15 +74,15 @@
 			].join(" ")}
 			onclick={() => update(RatingSystem.Thumbs)}
 		>
-			Thumbs
+			{t("profile.rating.thumbs")}
 		</button>
 	</div>
 </Setting>
 
 {#if store.userSettings?.ratingSystem === RatingSystem.OutOf10 || store.userSettings?.ratingSystem === RatingSystem.OutOf5 || !store.userSettings?.ratingSystem}
 	<Setting
-		title="Rating Step"
-		desc="How would you like to increment through the stars?"
+		title={t("profile.rating.steps")}
+		desc={t("profile.rating.stepsDescription")}
 	>
 		<div class="rat-wrap">
 			<button

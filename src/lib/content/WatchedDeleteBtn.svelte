@@ -4,6 +4,7 @@
 	import { removeWatched } from "../util/api";
 	import { notify } from "../util/notify";
 	import WatchedDeleteModal from "../watched/WatchedDeleteModal.svelte";
+	import { t } from "@/lib/i18n";
 
 	interface Props {
 		watchedId: number;
@@ -31,7 +32,7 @@
 <button
 	class="delete-btn"
 	onclick={() => onDeleteClicked()}
-	use:tooltip={{ text: "Delete", pos: "bot" }}
+	use:tooltip={{ text: t("common.delete"), pos: "bot" }}
 >
 	<Icon i="trash" wh={19} />
 </button>
@@ -43,7 +44,7 @@
 			if (!showConfirmDeleteModalCallback) {
 				notify({
 					type: "error",
-					text: "Somehow the deletion callback doesn't exist anymore so we couldn't delete! Please try again",
+					text: t("content.deleteError"),
 					time: 5000,
 				});
 				return;

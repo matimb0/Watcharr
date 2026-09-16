@@ -16,6 +16,7 @@ import (
 
 type ContentProvider interface {
 	GetOrCacheContent(contentType entity.ContentType, tmdbId int) (entity.Content, error)
+	GetOrCacheContentTranslation(content entity.Content, language string) (entity.ContentTranslation, error)
 }
 
 type GameProvider interface {
@@ -132,9 +133,26 @@ func (s *Service) GetWatchedPage(
 		slog.Error("GetWatchedPage: Failed!", "error", res.Error)
 		return util.PaginationResponse[entity.Watched, util.None]{}, res.Error
 	}
+	if userSettings.Language != nil {
+		s.localizeWatchedContent(*watched, *userSettings.Language)
+	}
 	pRes.Results = *watched
 	pRes.Finished(pp)
 	return *pRes, nil
+}
+
+func (s *Service) localizeWatchedContent(watched []entity.Watched, language string) {
+	for i := range watched {
+		content := watched[i].Content
+		if content == nil {
+			continue
+		}
+		translation, err := s.cp.GetOrCacheContentTranslation(*content, language)
+		if err == nil {
+			content.Title = translation.Title
+			content.Overview = translation.Overview
+		}
+	}
 }
 
 // Get a users **public** watchlist.
@@ -400,6 +418,11 @@ func (s *Service) AddWatched(
 		// Error if content has no id
 		if content.ID == 0 {
 			return entity.Watched{}, errors.New("failed to find content id")
+		}
+		if userSettings, settingsErr := s.userProvider.UserGetSettings(userId); settingsErr == nil && userSettings.Language != nil {
+			if _, translationErr := s.cp.GetOrCacheContentTranslation(content, *userSettings.Language); translationErr != nil {
+				slog.Warn("AddWatched: Failed to cache content translation", "error", translationErr)
+			}
 		}
 		// Add content to watched entry
 		watched.ContentID = &content.ID

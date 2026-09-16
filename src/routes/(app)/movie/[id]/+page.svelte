@@ -31,6 +31,7 @@
 	import TopCrewList from "@/lib/content/TopCrewList.svelte";
 	import { activityRemovedHook, activityUpdatedHook } from "@/lib/activity.js";
 	import Genres from "@/lib/content/Genres.svelte";
+	import { t } from "@/lib/i18n";
 
 	let { data } = $props();
 
@@ -113,11 +114,11 @@
 </script>
 
 <svelte:head>
-	<title>{movie?.name ? `${movie.name} - ` : ""}Movie</title>
+	<title>{movie?.name ? `${movie.name} - ` : ""}{t("details.movie")}</title>
 </svelte:head>
 
 {#if pageError}
-	<Error pretty="Failed to load movie!" error={pageError} />
+	<Error pretty={t("details.failedMovie")} error={pageError} />
 {:else if !movie}
 	<Spinner />
 {:else if Object.keys(movie).length > 0}
@@ -166,9 +167,9 @@
 									target="_blank"
 								>
 									{#if localStorage.getItem("useEmby")}
-										<Icon i="emby" wh={14} />Play On Emby
+										<Icon i="emby" wh={14} />{t("details.playOn")} Emby
 									{:else}
-										<Icon i="jellyfin" wh={14} />Play On Jellyfin
+										<Icon i="jellyfin" wh={14} />{t("details.playOn")} Jellyfin
 									{/if}
 								</a>
 							{/if}
@@ -193,7 +194,11 @@
 											}
 										}}
 										use:tooltip={{
-											text: `${movie.watched?.pinned ? "Unpin from" : "Pin to"} top of list`,
+											text: t(
+												movie.watched?.pinned
+													? "details.unpinFromTopList"
+													: "details.pinToTopList",
+											),
 											pos: "bot",
 										}}
 									>
@@ -260,7 +265,7 @@
 				{/if}
 
 				{#if credits.cast?.length > 0}
-					<HorizontalList title="Cast">
+					<HorizontalList title={t("details.cast")}>
 						{#each credits.cast?.slice(0, 50) as cast (cast.credit_id)}
 							<PersonPoster
 								id={cast.id}
@@ -273,7 +278,7 @@
 					</HorizontalList>
 				{/if}
 			{:catch err}
-				<Error error={err} pretty="Failed to load cast!" />
+				<Error error={err} pretty={t("details.failedCast")} />
 			{/await}
 
 			{#if movie.similar}
@@ -290,7 +295,7 @@
 		</div>
 	</div>
 {:else}
-	Movie not found
+	{t("details.movie")} {t("details.notFound")}
 {/if}
 
 <style lang="scss">

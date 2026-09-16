@@ -13,6 +13,7 @@ func (t *TMDB) Trending(
 	ttype TrendingType,
 	pageNum int,
 	region string,
+	language string,
 ) (TrendingCombined, error) {
 	resp := new(TrendingCombined)
 	if ttype != TrendingTypeAll &&
@@ -29,7 +30,8 @@ func (t *TMDB) Trending(
 		"Trending",
 		string(ttype),
 		region,
-		pageNum)
+		pageNum,
+		language)
 	if cache.GetCache(ContentStore, cacheKey, &resp) {
 		slog.Debug("Trending: Returning cache.")
 		return *resp, nil
@@ -39,6 +41,7 @@ func (t *TMDB) Trending(
 		map[string]string{
 			"page":   strconv.Itoa(pageNum),
 			"region": region,
+			"language": language,
 		},
 		&resp)
 	if err != nil {

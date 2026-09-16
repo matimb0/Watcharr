@@ -2,7 +2,7 @@
 	import Icon from "./Icon.svelte";
 	import type { WatchedStatus } from "../types";
 	import tooltip from "./actions/tooltip";
-	import { toUnderstandableStatus } from "./util/helpers";
+	import { t } from "@/lib/i18n";
 
 	interface Props {
 		status: WatchedStatus | undefined;
@@ -16,6 +16,12 @@
 		if (s === status) return;
 		onChange(s);
 	}
+
+	function statusLabel(status: WatchedStatus) {
+		if (isForGame && status === "FINISHED") return t("status.played");
+		if (isForGame && status === "WATCHING") return t("status.playing");
+		return t(`status.${status.toLowerCase()}`);
+	}
 </script>
 
 <div class="status">
@@ -23,7 +29,7 @@
 		class={status && status !== "PLANNED" ? "not-active" : ""}
 		onclick={() => handleStatusClick("PLANNED")}
 		use:tooltip={{
-			text: toUnderstandableStatus("PLANNED", isForGame),
+			text: statusLabel("PLANNED"),
 			pos: "top",
 		}}
 	>
@@ -33,7 +39,7 @@
 		class={status && status !== "WATCHING" ? "not-active" : ""}
 		onclick={() => handleStatusClick("WATCHING")}
 		use:tooltip={{
-			text: toUnderstandableStatus("WATCHING", isForGame),
+			text: statusLabel("WATCHING"),
 			pos: "top",
 		}}
 	>
@@ -43,7 +49,7 @@
 		class={status && status !== "FINISHED" ? "not-active" : ""}
 		onclick={() => handleStatusClick("FINISHED")}
 		use:tooltip={{
-			text: toUnderstandableStatus("FINISHED", isForGame),
+			text: statusLabel("FINISHED"),
 			pos: "top",
 		}}
 	>
@@ -53,7 +59,7 @@
 		class={status && status !== "HOLD" ? "not-active" : ""}
 		onclick={() => handleStatusClick("HOLD")}
 		use:tooltip={{
-			text: toUnderstandableStatus("HOLD", isForGame),
+			text: statusLabel("HOLD"),
 			pos: "top",
 		}}
 	>
@@ -63,7 +69,7 @@
 		class={status && status !== "DROPPED" ? "not-active" : ""}
 		onclick={() => handleStatusClick("DROPPED")}
 		use:tooltip={{
-			text: toUnderstandableStatus("DROPPED", isForGame),
+			text: statusLabel("DROPPED"),
 			pos: "top",
 		}}
 	>

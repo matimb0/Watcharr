@@ -51,6 +51,7 @@ export function isTouch() {
 }
 
 /**
+ * it should be possible to delete it
  * Turns a WatchedStatus into readable and context aware text.
  * Watched statuses can be used normally for movies/tv, but
  * for games, we want to transform the status to make more sense.

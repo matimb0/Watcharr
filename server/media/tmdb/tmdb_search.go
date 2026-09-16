@@ -23,6 +23,7 @@ type SearchUniversalOptions struct {
 	Query string
 	Page  int
 	Adult bool
+	Language string
 }
 
 // Check if SearchUniversalOptions is valid.
@@ -42,6 +43,7 @@ func (o *SearchUniversalOptions) AsParamsMap() map[string]string {
 	m := map[string]string{
 		"query": o.Query,
 		"page":  strconv.Itoa(o.Page),
+		"language": o.Language,
 	}
 	if o.Adult {
 		m["include_adult"] = "true"
@@ -61,6 +63,7 @@ func (t *TMDB) SearchMulti(
 		o.Query,
 		o.Page,
 		o.Adult)
+	cacheKey = cache.CreateCacheKey(cacheKey, o.Language)
 	if cache.GetCache(ContentStore, cacheKey, &resp) {
 		slog.Debug("SearchMulti: Returning cache.")
 		return *resp, nil
@@ -108,6 +111,7 @@ func (t *TMDB) SearchMovies(
 		o.Adult,
 		o.Year,
 		o.PrimaryYear)
+	cacheKey = cache.CreateCacheKey(cacheKey, o.Language)
 	if cache.GetCache(ContentStore, cacheKey, &resp) {
 		slog.Debug("SearchMovies: Returning cache.")
 		return *resp, nil
@@ -158,6 +162,7 @@ func (t *TMDB) SearchShows(
 		o.Adult,
 		o.Year,
 		o.PrimaryYear)
+	cacheKey = cache.CreateCacheKey(cacheKey, o.Language)
 	if cache.GetCache(ContentStore, cacheKey, &resp) {
 		slog.Debug("SearchShows: Returning cache.")
 		return *resp, nil
@@ -189,6 +194,7 @@ func (t *TMDB) SearchPeople(
 		o.Query,
 		o.Page,
 		o.Adult)
+	cacheKey = cache.CreateCacheKey(cacheKey, o.Language)
 	if cache.GetCache(ContentStore, cacheKey, &resp) {
 		slog.Debug("SearchPeople: Returning cache.")
 		return *resp, nil
@@ -213,19 +219,20 @@ func (t *TMDB) SearchPeople(
 func (t *TMDB) SearchByExternalId(
 	id string,
 	source string,
+	language string,
 ) (SearchMultiResponse, error) {
 	resp := new(FindByExternalIdResponse)
 	if source == "" {
 		source = "imdb"
 	}
-	cacheKey := cache.CreateCacheKey("SearchByExternalId", id, source)
+	cacheKey := cache.CreateCacheKey("SearchByExternalId", id, source, language)
 	if cache.GetCache(ContentStore, cacheKey, &resp) {
 		slog.Debug("SearchByExternalId: Got cache.")
 	} else {
 		// If not found in cache, request data from tmdb.
 		err := t.req(
 			"/find/"+id,
-			map[string]string{"external_source": source + "_id"},
+			map[string]string{"external_source": source + "_id", "language": language},
 			&resp)
 		if err != nil {
 			slog.Error("Failed to complete find/external_id request!",

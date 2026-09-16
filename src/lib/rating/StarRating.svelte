@@ -7,6 +7,7 @@
 	import { RatingStep, RatingSystem } from "@/types";
 	import { onMount } from "svelte";
 	import { isTouch } from "../util/helpers";
+	import { t } from "@/lib/i18n";
 
 	interface Props {
 		rating: number | undefined;
@@ -35,18 +36,13 @@
 	 */
 	let scrollLocAtStart = 0;
 
-	const ratingDesc = [
-		"Apalling",
-		"Horrible",
-		"Very Bad",
-		"Bad",
-		"Average",
-		"Fine",
-		"Good",
-		"Very Good",
-		"Great",
-		"Masterpiece",
-	];
+	const ratingDescKeys = [
+		"appalling", "horrible", "veryBad", "bad", "average", "fine", "good", "veryGood", "great", "masterpiece",
+	] as const;
+
+	function ratingDescription(rating: number) {
+		return t(`rating.ratingDescriptions.${ratingDescKeys[rating - 1]}`);
+	}
 
 	async function saveSelectedRating() {
 		if (!shownPerc) {
@@ -301,9 +297,9 @@ shownPerc: {shownPerc}<br /> -->
 	<span bind:this={ratingText}>
 		{#if hoveredRating}
 			{#if store.userSettings?.ratingSystem === RatingSystem.OutOf5 && shownPerc}
-				{ratingDesc[Math.ceil(shownPerc / 10) - 1]}
+				{ratingDescription(Math.ceil(shownPerc / 10))}
 			{:else}
-				{ratingDesc[Math.ceil(hoveredRating) - 1]}
+				{ratingDescription(Math.ceil(hoveredRating))}
 			{/if}
 			{#if store.userSettings?.ratingSystem === RatingSystem.OutOf100}
 				({shownPerc})
@@ -311,7 +307,7 @@ shownPerc: {shownPerc}<br /> -->
 				({hoveredRating})
 			{/if}
 		{:else if typeof rating === "number" && rating > 0}
-			{ratingDesc[Math.ceil(rating) - 1]}
+			{ratingDescription(Math.ceil(rating))}
 			{#if shownPerc}
 				{#if store.userSettings?.ratingSystem === RatingSystem.OutOf100}
 					({shownPerc})
@@ -322,7 +318,7 @@ shownPerc: {shownPerc}<br /> -->
 				{/if}
 			{/if}
 		{:else}
-			Select Your Rating
+			{t("rating.selectRating")}
 		{/if}
 	</span>
 	<div
@@ -405,7 +401,7 @@ shownPerc: {shownPerc}<br /> -->
 		</div>
 	</div>
 	<span class="keyboard-tip"
-		>Left/Right Arrows to change rating, Enter to save.</span
+		>{t("rating.keyboardRatingTip")}</span
 	>
 </div>
 

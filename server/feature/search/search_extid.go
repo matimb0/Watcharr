@@ -12,6 +12,7 @@ import (
 // Eg: Search term is in provider:id format or is a supported url.
 func (s *Service) searchExtProviderById(
 	query string,
+	language string,
 	resp *domain.SearchResponse,
 ) bool {
 	queryLower := strings.ToLower(query)
@@ -28,11 +29,11 @@ func (s *Service) searchExtProviderById(
 
 	switch provider {
 	case "movie":
-		if err := s.searchMovieById(providerID, resp); err == nil {
+		if err := s.searchMovieById(providerID, language, resp); err == nil {
 			return true
 		}
 	case "tv":
-		if err := s.searchTvById(providerID, resp); err == nil {
+		if err := s.searchTvById(providerID, language, resp); err == nil {
 			return true
 		}
 	case "igdb":
@@ -49,6 +50,7 @@ func (s *Service) searchExtProviderById(
 		tmdbRes, err := s.tmdb.SearchByExternalId(
 			providerID,
 			provider,
+			language,
 		)
 		if err != nil {
 			slog.Error("searchExtProviderById: Failed to search tmdb!",

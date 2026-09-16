@@ -160,7 +160,7 @@ func (s *Service) discoverMultiTrending(
 	meta domain.DiscoverRequestMeta,
 	resp *domain.DiscoverResponse,
 ) error {
-	tmdbRes, err := s.tmdb.Trending(t, meta.PageParams.Page, meta.Region)
+	tmdbRes, err := s.tmdb.Trending(t, meta.PageParams.Page, meta.Region, meta.Language)
 	if err != nil {
 		slog.Error("discoverMulti: Failed to search tmdb!", "error", err)
 		return errors.New("content request failed")
@@ -189,6 +189,7 @@ func (s *Service) discoverMovieInTheatres(
 		},
 		meta.PageParams.Page,
 		meta.Region,
+		meta.Language,
 	)
 	if err != nil {
 		slog.Error("discoverMovieInTheatres: Failed to search tmdb!",
@@ -219,6 +220,7 @@ func (s *Service) discoverMovieUpcoming(
 		},
 		meta.PageParams.Page,
 		meta.Region,
+		meta.Language,
 	)
 	if err != nil {
 		slog.Error("discoverMovieUpcoming: Failed to search tmdb!",
@@ -245,6 +247,7 @@ func (s *Service) discoverMoviePopular(
 		tmdb.DiscoverOptions{},
 		meta.PageParams.Page,
 		meta.Region,
+		meta.Language,
 	)
 	if err != nil {
 		slog.Error("discoverMoviePopular: Failed to search tmdb!",
@@ -275,6 +278,7 @@ func (s *Service) discoverTvUpcoming(
 		},
 		meta.PageParams.Page,
 		meta.Region,
+		meta.Language,
 	)
 	if err != nil {
 		slog.Error("discoverTvUpcoming: Failed to search tmdb!",
@@ -301,6 +305,7 @@ func (s *Service) discoverTvPopular(
 		tmdb.DiscoverOptions{},
 		meta.PageParams.Page,
 		meta.Region,
+		meta.Language,
 	)
 	if err != nil {
 		slog.Error("discoverTvPopular: Failed to search tmdb!",
@@ -325,6 +330,7 @@ func (s *Service) discoverPeoplePopular(
 ) error {
 	tmdbRes, err := s.tmdb.PopularPeople(
 		meta.PageParams.Page,
+		meta.Language,
 	)
 	if err != nil {
 		slog.Error("discoverPeoplePopular: Failed to search tmdb!",

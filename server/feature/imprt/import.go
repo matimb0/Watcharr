@@ -36,7 +36,7 @@ type TagProvider interface {
 }
 
 type SearchProvider interface {
-	Search(r domain.SearchRequest, pp util.PaginationParams, userId uint) (domain.SearchResponse, error)
+	Search(r domain.SearchRequest, pp util.PaginationParams, userId uint, language string) (domain.SearchResponse, error)
 }
 
 type Service struct {

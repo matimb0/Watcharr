@@ -13,11 +13,13 @@ func (t *TMDB) DiscoverMovies(
 	o DiscoverOptions,
 	pageNum int,
 	region string,
+	language string,
 ) (DiscoverMovies, error) {
 	resp := new(DiscoverMovies)
 	reqParams := map[string]string{
 		"page":   strconv.Itoa(pageNum),
 		"region": region,
+		"language": language,
 	}
 	t.applyDiscoverOptionsToMap(true, o, reqParams)
 	cacheKey := cache.CreateCacheKey(
@@ -41,11 +43,13 @@ func (t *TMDB) DiscoverShows(
 	o DiscoverOptions,
 	pageNum int,
 	region string,
+	language string,
 ) (DiscoverShows, error) {
 	resp := new(DiscoverShows)
 	reqParams := map[string]string{
 		"page":   strconv.Itoa(pageNum),
 		"region": region,
+		"language": language,
 	}
 	t.applyDiscoverOptionsToMap(false, o, reqParams)
 	cacheKey := cache.CreateCacheKey(
