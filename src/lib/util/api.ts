@@ -17,6 +17,7 @@ import {
 } from "@/types";
 import { Reqer, ReqerError } from "./fetch";
 import { notify, unNotify } from "./notify";
+import { emitWatchedRemoved, emitWatchedUpdated } from "./watchedEvents";
 import { browser } from "$app/environment";
 import { page } from "$app/state";
 const { MODE } = import.meta.env;
@@ -155,6 +156,9 @@ export async function updateWatched(
 				console.error("updateWatched: Failed to update!", err);
 				throw err;
 			}
+			// Let the (cached) watched list sync this change so it is
+			// already correct when the user returns to the main page.
+			emitWatchedUpdated(wEntry);
 			// We are updating, so a wEntry exists here.
 			// So we will always return the existing entry.
 			return wEntry;
@@ -197,6 +201,9 @@ export async function removeWatched(id: number): Promise<boolean> {
 		const resp = await req.delete(`/watched/${id}`);
 		console.log("removeWatched: Removed resp:", resp);
 		notify({ id: nid, text: "Removed!", type: "success" });
+		// Let the (cached) watched list remove this entry so it is
+		// already correct when the user returns to the main page.
+		emitWatchedRemoved(id);
 		return true;
 	} catch (err) {
 		console.error("removeWatched: Failed!", err);
