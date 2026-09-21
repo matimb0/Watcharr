@@ -1,71 +1,140 @@
 <script lang="ts">
-	import { goto } from "$app/navigation";
+	import { afterNavigate, goto } from "$app/navigation";
 	import { resolve } from "$app/paths";
 	import Error from "@/lib/Error.svelte";
 	import Icon from "@/lib/Icon.svelte";
 	import Poster from "@/lib/poster/Poster.svelte";
 	import PosterList from "@/lib/poster/PosterList.svelte";
 	import Spinner from "@/lib/Spinner.svelte";
-	import { req } from "@/lib/util/api";
 	import infScroll from "@/lib/util/infScroll";
-	import paginatedLoader from "@/lib/util/paginatedLoader.svelte";
+	import {
+		ensureWatchedListLoaded,
+		getWatchedListLoader,
+		reconcileWatchedList,
+		setActiveScroll,
+		watchedListReconciling,
+	} from "@/lib/watchedList.svelte";
 	import { clearActiveFilters, store } from "@/store.svelte";
-	import { type Media, type PaginationResponse } from "@/types";
-	import { onDestroy, untrack } from "svelte";
+	import { onDestroy, onMount, tick, untrack } from "svelte";
 
 	const scroll = infScroll({ callback: onScrollToBottom });
-	const dataLoader = paginatedLoader<Media, undefined>(load);
-
-	let nextLoadParams: {
-		page: number;
-		[x: string]: unknown;
-	} = $derived({
-		page: dataLoader.state.page + 1,
-		...store.sortAndFiltersForQueryParams,
-	});
-
-	async function load(signal: AbortSignal) {
-		console.debug("load: loadParams:", nextLoadParams);
-		if (nextLoadParams.page === dataLoader.state.page) {
-			console.warn("load: Already on this page, not loading it again!");
-			return;
-		}
-		const r = await req.get<PaginationResponse<Media, undefined>>(`/watched`, {
-			params: nextLoadParams,
-			signal,
-		});
-		scroll.dataLoaded();
-		return r;
-	}
+	const dataLoader = getWatchedListLoader();
 
 	async function onScrollToBottom() {
 		// If an error is being shown, no more infinite scroll.
 		if (dataLoader.state.reqLoadError) {
 			return;
 		}
+		// Don't append more content while the restored list is being
+		// reconciled in the background; we re-check afterwards.
+		if (watchedListReconciling()) {
+			return;
+		}
 		dataLoader.runFn();
 	}
 
-	// NOTE: This effect also handles initial load of data.
+	// Whether the initial load (on mount) was already handled by
+	// `afterNavigate` below. This is a per-mount variable so we can
+	// decide between restoring the old list or loading fresh.
+	let initialLoadHandled = false;
+
 	$effect(() => {
-		// When our sort/filter query params change,
-		// load our list again.
-		// Since it exists at load, this performs our
-		// initial load of data too.
-		if (store.sortAndFiltersForQueryParams) {
+		if (initialLoadHandled && store.sortAndFiltersForQueryParams) {
 			untrack(() => {
-				// We don't want to trigger another re-run of this
-				// effect when state inside these funcs changes.
-				dataLoader.reset();
-				dataLoader.runFn();
+				// Sort/filter params changed -> fresh load of the list.
+				ensureWatchedListLoaded(false);
 			});
 		}
+	});
+
+	afterNavigate(({ type }) => {
+		if (initialLoadHandled) {
+			return;
+		}
+		initialLoadHandled = true;
+		untrack(() => {
+			if (ensureWatchedListLoaded(type === "popstate")) {
+				// Restored the existing list
+				scroll.dataLoaded();
+				// Silently refresh the restored list
+				void reconcileAndFixScroll();
+			}
+		});
+	});
+
+	interface ScrollAnchor {
+		watchedId: number;
+		top: number;
+		scrollY: number;
+	}
+
+	function captureScrollAnchor(): ScrollAnchor | undefined {
+		const lis = Array.from(document.querySelectorAll<HTMLLIElement>("ul li"));
+		const data = dataLoader.state.data;
+		let best: ScrollAnchor | undefined;
+		for (let i = 0; i < lis.length; i++) {
+			const watchedId = data[i]?.watched?.id;
+			if (!watchedId) {
+				continue;
+			}
+			const rect = lis[i].getBoundingClientRect();
+			if (rect.bottom <= 0 || rect.top >= window.innerHeight) {
+				continue;
+			}
+			if (!best || rect.top < best.top) {
+				best = { watchedId, top: rect.top, scrollY: window.scrollY };
+			}
+		}
+		return best;
+	}
+
+	function restoreScrollAnchor(anchor: ScrollAnchor | undefined) {
+		if (!anchor) {
+			return;
+		}
+		// The user started scrolling during the refresh, don't yank
+		// them back to the anchor.
+		if (Math.abs(window.scrollY - anchor.scrollY) > 5) {
+			return;
+		}
+		const lis = Array.from(document.querySelectorAll<HTMLLIElement>("ul li"));
+		const idx = dataLoader.state.data.findIndex(
+			(m) => m.watched?.id === anchor.watchedId,
+		);
+		if (idx < 0 || idx >= lis.length) {
+			return;
+		}
+		window.scrollBy(0, anchor.top - lis[idx].getBoundingClientRect().top);
+	}
+
+	async function reconcileAndFixScroll() {
+		const anchor = captureScrollAnchor();
+		await reconcileWatchedList();
+		await tick();
+		restoreScrollAnchor(anchor);
+		scroll.dataLoaded();
+	}
+
+	onMount(() => {
+		setActiveScroll(scroll);
+
+		const initialLoadTimeout = window.setTimeout(() => {
+			if (!initialLoadHandled) {
+				initialLoadHandled = true;
+				console.debug("MAIN PAGE: No navigation event, loading fresh.");
+				ensureWatchedListLoaded(false);
+			}
+		}, 0);
+
+		return () => {
+			window.clearTimeout(initialLoadTimeout);
+		};
 	});
 
 	onDestroy(() => {
 		console.log("MAIN PAGE DESTROYED");
 		scroll.destroy();
-		dataLoader.abortReq("page destroyed");
+		setActiveScroll(undefined);
 	});
 </script>
 
@@ -90,7 +159,7 @@
 
 <PosterList>
 	{#if dataLoader.state.data?.length > 0}
-		{#each dataLoader.state.data as w, i (`${i}-${w.type}`)}
+		{#each dataLoader.state.data as w, i (w.watched?.id ?? `${i}-${w.type}`)}
 			{#if w}
 				<Poster
 					bind:watched={dataLoader.state.data[i].watched}
